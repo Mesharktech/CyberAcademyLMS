@@ -1,0 +1,77 @@
+[
+    {
+        "title": "Offensive Web Exploitation (OWASP Top 10)",
+        "description": "Master the art of exploiting modern web applications. Focuses on Injection, Broken Authentication, and SSRF. Ideal for VAPT operators.",
+        "difficulty": "Advanced",
+        "modules": [
+            {
+                "title": "SQL Injection Mechanics",
+                "type": "TEXT",
+                "content": "## Overview of SQL Injection Mechanics\n\nOperation Briefing: Bypass authentication and extract database schema.\n\n### Strategic Objectives\n- Analyze the attack surface.\n- Formulate countermeasures.\n- Execute with precision.\n\n*Note: This data has been synchronized with the main Sherk Academy DB.*",
+                "orderIndex": 0
+            },
+            {
+                "title": "Cross-Site Scripting (XSS)",
+                "type": "LAB",
+                "content": "## Overview of Cross-Site Scripting (XSS)\n\nOperation Briefing: Stored, Reflected, and DOM-based XSS vectors.\n\n### Strategic Objectives\n- Analyze the attack surface.\n- Formulate countermeasures.\n- Execute with precision.\n\n*Note: This data has been synchronized with the main Sherk Academy DB.*",
+                "orderIndex": 1
+            },
+            {
+                "title": "Server-Side Request Forgery",
+                "type": "TEXT",
+                "content": "## Overview of Server-Side Request Forgery\n\nOperation Briefing: Exploiting internal infrastructure from the perimeter.\n\n### Strategic Objectives\n- Analyze the attack surface.\n- Formulate countermeasures.\n- Execute with precision.\n\n*Note: This data has been synchronized with the main Sherk Academy DB.*",
+                "orderIndex": 2
+            }
+        ]
+    },
+    {
+        "title": "Defensive Cyber Operations (SOC Analyst)",
+        "description": "Learn to detect, analyze, and respond to advanced persistent threats (APTs) using SIEM tools, IDS/IPS, and Endpoint Detection.",
+        "difficulty": "Intermediate",
+        "modules": [
+            {
+                "title": "Introduction to Splunk",
+                "type": "TEXT",
+                "content": "## Overview of Introduction to Splunk\n\nOperation Briefing: Querying logs and building threat hunting dashboards.\n\n### Strategic Objectives\n- Analyze the attack surface.\n- Formulate countermeasures.\n- Execute with precision.\n\n*Note: This data has been synchronized with the main Sherk Academy DB.*",
+                "orderIndex": 0
+            },
+            {
+                "title": "Incident Response Protocols",
+                "type": "QUIZ",
+                "content": "[{\"question\": \"In the context of Incident Response Protocols, what is the primary objective?\", \"options\": [\"Analyze the surface\", \"Ignore logs\", \"Reboot system\", \"Run update\"], \"correctAnswer\": 0, \"explanation\": \"Analysis is always the first step in the PICERL methodology.\"}, {\"question\": \"Which command is most likely used during this operation?\", \"options\": [\"ls -la\", \"ping 127.0.0.1\", \"exit\", \"nmap -sV\"], \"correctAnswer\": 3, \"explanation\": \"Nmap is the standard reconnaissance tool.\"}]",
+                "orderIndex": 1
+            },
+            {
+                "title": "Malware Traffic Analysis",
+                "type": "LAB",
+                "content": "## Overview of Malware Traffic Analysis\n\nOperation Briefing: Using Wireshark to dissect command and control (C2) beacons.\n\n### Strategic Objectives\n- Analyze the attack surface.\n- Formulate countermeasures.\n- Execute with precision.\n\n*Note: This data has been synchronized with the main Sherk Academy DB.*",
+                "orderIndex": 2
+            }
+        ]
+    },
+    {
+        "title": "Cloud Security Architecture (AWS/Azure)",
+        "description": "Secure cloud deployments against misconfigurations and privilege escalation attacks. Includes IAM auditing and serverless vulnerabilities.",
+        "difficulty": "Expert",
+        "modules": [
+            {
+                "title": "IAM Privilege Escalation",
+                "type": "TEXT",
+                "content": "## Overview of IAM Privilege Escalation\n\nOperation Briefing: Finding overly permissive roles and exploiting them.\n\n### Strategic Objectives\n- Analyze the attack surface.\n- Formulate countermeasures.\n- Execute with precision.\n\n*Note: This data has been synchronized with the main Sherk Academy DB.*",
+                "orderIndex": 0
+            },
+            {
+                "title": "S3 Bucket Enumeration",
+                "type": "LAB",
+                "content": "## Overview of S3 Bucket Enumeration\n\nOperation Briefing: Identifying and extracting sensitive data from exposed buckets.\n\n### Strategic Objectives\n- Analyze the attack surface.\n- Formulate countermeasures.\n- Execute with precision.\n\n*Note: This data has been synchronized with the main Sherk Academy DB.*",
+                "orderIndex": 1
+            },
+            {
+                "title": "Cloud Security Posture Exam",
+                "type": "QUIZ",
+                "content": "[{\"question\": \"In the context of Cloud Security Posture Exam, what is the primary objective?\", \"options\": [\"Analyze the surface\", \"Ignore logs\", \"Reboot system\", \"Run update\"], \"correctAnswer\": 0, \"explanation\": \"Analysis is always the first step in the PICERL methodology.\"}, {\"question\": \"Which command is most likely used during this operation?\", \"options\": [\"ls -la\", \"ping 127.0.0.1\", \"exit\", \"nmap -sV\"], \"correctAnswer\": 3, \"explanation\": \"Nmap is the standard reconnaissance tool.\"}]",
+                "orderIndex": 2
+            }
+        ]
+    }
+]

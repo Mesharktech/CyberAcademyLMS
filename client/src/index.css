@@ -1,0 +1,173 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-orbitron: 'Orbitron', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+
+  /* Premium Darks */
+  --color-base: #050505;
+  --color-surface-dark: #0a0a0a;
+  --color-surface: rgba(15, 15, 20, 0.7);
+  --color-surface-hover: rgba(30, 30, 40, 0.8);
+
+  /* Neon Accents */
+  --color-neon-cyan: #00f0ff;
+  --color-neon-purple: #bd00ff;
+  --color-neon-blue: #005eff;
+
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-base);
+  color: #e2e8f0;
+  font-family: var(--font-inter);
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(189, 0, 255, 0.04), transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.04), transparent 50%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-orbitron);
+  letter-spacing: 0.05em;
+}
+
+/* Premium Glassmorphism */
+.glass-premium {
+  background: var(--color-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-premium:hover {
+  background: var(--color-surface-hover);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Fluid Typography Gradients */
+.text-gradient-primary {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(135deg, var(--color-neon-cyan), var(--color-neon-purple));
+}
+
+/* Animated Cyber Borders */
+.cyber-border {
+  position: relative;
+  background: var(--color-surface);
+}
+
+.cyber-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(90deg, var(--color-neon-cyan), var(--color-neon-purple), var(--color-neon-blue), var(--color-neon-cyan));
+  background-size: 300% 300%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: cyber-border-anim 4s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cyber-border:hover::before {
+  opacity: 1;
+}
+
+/* Base button styling replacement */
+.premium-button {
+  background: transparent;
+  color: white;
+  font-family: var(--font-orbitron);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.1) inset;
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+}
+
+.premium-button:hover {
+  border-color: var(--color-neon-cyan);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3) inset, 0 0 20px rgba(0, 240, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Custom Webkit Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neon-purple);
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+  }
+
+  to {
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.6), 0 0 30px rgba(189, 0, 255, 0.4);
+  }
+}
+
+@keyframes cyber-border-anim {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}

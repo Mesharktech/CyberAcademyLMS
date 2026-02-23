@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CyberAcademyLMS</string>
+    <string name="title_activity_main">CyberAcademyLMS</string>
+    <string name="package_name">com.cyberacademy.lms</string>
+    <string name="custom_url_scheme">com.cyberacademy.lms</string>
+</resources>

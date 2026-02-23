@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build outputs
+client/dist/
+server/dist/
+
+# Environment files (keep secrets out of git!)
+.env
+.env.local
+.env.production
+server/.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Prisma generated client (regenerated on deploy)
+server/node_modules/.prisma/
+
+# Temporary files
+*.tmp
+temp_*
+tsc_*.txt
+seed_error.txt
+clean_log.txt
+output*.txt
+debug_*.ts
+debug_*.js
+sandbox*.txt
