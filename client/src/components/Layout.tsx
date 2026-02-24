@@ -16,7 +16,7 @@ export const Layout: React.FC = () => {
 
 
     return (
-        <div className="min-h-screen text-gray-200 font-sans selection:bg-cyan-500/30 selection:text-cyan-100">
+        <div className="min-h-screen text-gray-200 font-sans selection:bg-cyan-500/30 selection:text-cyan-100 overflow-x-hidden w-full">
             <nav className="glass-premium sticky top-0 z-50 px-8 py-5 flex justify-between items-center border-b border-white/5 mx-4 mt-4 rounded-2xl">
                 <div className="flex items-center space-x-4 group cursor-pointer" onClick={() => navigate('/')}>
                     <div className="relative">

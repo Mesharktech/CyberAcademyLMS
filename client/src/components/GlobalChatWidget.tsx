@@ -59,20 +59,20 @@ export const GlobalChatWidget: React.FC = () => {
             {/* Floating Action Button */}
             <button
                 onClick={toggleChat}
-                className={`fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-[0_0_30px_rgba(0,240,255,0.4)] transition-all duration-500 hover:scale-110 border ${isOpen ? 'bg-purple-600 rotate-180 border-purple-400/50 shadow-[0_0_30px_rgba(189,0,255,0.4)]' : 'bg-cyan-500 border-cyan-300'
+                className={`fixed bottom-4 sm:bottom-8 right-4 sm:right-8 z-50 p-3 sm:p-4 rounded-full shadow-[0_0_30px_rgba(0,240,255,0.4)] transition-all duration-500 hover:scale-110 border ${isOpen ? 'bg-purple-600 rotate-180 border-purple-400/50 shadow-[0_0_30px_rgba(189,0,255,0.4)]' : 'bg-cyan-500 border-cyan-300'
                     }`}
             >
-                {isOpen ? <X size={28} className="text-white" /> : <Terminal size={28} className="text-black" />}
+                {isOpen ? <X className="text-white w-6 h-6 sm:w-7 sm:h-7" /> : <Terminal className="text-black w-6 h-6 sm:w-7 sm:h-7" />}
             </button>
 
             {/* Chat Window */}
             <div
-                className={`fixed bottom-[100px] right-8 z-50 w-[380px] md:w-[450px] glass-premium rounded-3xl overflow-hidden transition-all duration-500 origin-bottom-right flex flex-col ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-10 pointer-events-none'
+                className={`fixed bottom-[80px] sm:bottom-[100px] right-4 sm:right-8 z-50 w-[calc(100vw-32px)] sm:w-[380px] md:w-[450px] glass-premium rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 origin-bottom-right flex flex-col ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-10 pointer-events-none'
                     }`}
-                style={{ height: '700px', maxHeight: '85vh' }}
+                style={{ height: '700px', maxHeight: 'calc(100vh - 100px)' }}
             >
                 {/* Header */}
-                <div className="p-6 border-b border-white/10 bg-black/60 relative overflow-hidden flex flex-col justify-center">
+                <div className="p-4 sm:p-6 border-b border-white/10 bg-black/60 relative overflow-hidden flex flex-col justify-center">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent bg-[length:200%_100%] animate-cyber-border-anim opacity-50 z-0"></div>
                     <div className="relative z-10">
                         <h3 className="font-bold text-white font-orbitron flex items-center gap-3 text-xl tracking-widest drop-shadow-[0_0_8px_rgba(0,240,255,0.5)]">
@@ -86,10 +86,10 @@ export const GlobalChatWidget: React.FC = () => {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-grow overflow-y-auto p-6 space-y-6 custom-scrollbar bg-black/40 scroll-smooth relative z-10">
+                <div className="flex-grow overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar bg-black/40 scroll-smooth relative z-10">
                     {messages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[85%] rounded-2xl p-5 text-sm leading-relaxed ${msg.role === 'user'
+                            <div className={`max-w-[85%] rounded-2xl p-4 sm:p-5 text-sm leading-relaxed ${msg.role === 'user'
                                 ? 'bg-cyan-500/10 text-cyan-50 rounded-br-sm border border-cyan-400/30 shadow-[0_4px_20px_rgba(0,240,255,0.1)]'
                                 : 'bg-black/60 text-gray-200 rounded-bl-sm border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.3)]'
                                 }`}>
@@ -116,8 +116,8 @@ export const GlobalChatWidget: React.FC = () => {
                 </div>
 
                 {/* Input Area */}
-                <form onSubmit={handleSendMessage} className="p-5 border-t border-white/10 bg-black/60 relative z-10">
-                    <div className="relative flex items-center gap-3 bg-black/40 rounded-full border border-white/10 px-3 py-2 focus-within:border-cyan-400/50 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.1)_inset] transition-all duration-300">
+                <form onSubmit={handleSendMessage} className="p-4 sm:p-5 border-t border-white/10 bg-black/60 relative z-10">
+                    <div className="relative flex items-center gap-2 sm:gap-3 bg-black/40 rounded-full border border-white/10 px-3 py-2 focus-within:border-cyan-400/50 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.1)_inset] transition-all duration-300">
                         <input
                             type="text"
                             value={chatInput}
