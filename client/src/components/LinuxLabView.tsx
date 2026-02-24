@@ -110,7 +110,7 @@ export const LinuxLabView: React.FC<LinuxLabViewProps> = ({ onComplete }) => {
 
     const saveNanoFile = async () => {
         try {
-            const res = await api.post('/labs/write', {
+            await api.post('/labs/write', {
                 filename: nanoFile,
                 content: nanoContent,
                 cwd: currentCwd
