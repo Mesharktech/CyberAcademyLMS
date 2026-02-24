@@ -10,13 +10,13 @@ app.use(helmet());
 const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173', 'capacitor://localhost', 'http://localhost'];
 
 app.use(cors({
-    origin: function (origin, callback) {
+    origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
         // allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
         if (allowedOrigins.indexOf(origin) === -1) {
             return callback(null, true); // Permissive for MVP/local dev
         }
-        return callback(null, origin);
+        return callback(null, true);
     },
     credentials: true
 }));
@@ -40,7 +40,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/users', userRoutes);
 
 // Health Check
-app.get('/health', (req, res) => {
+app.get('/health', (req: express.Request, res: express.Response) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
