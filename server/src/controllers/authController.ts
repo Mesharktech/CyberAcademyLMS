@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { PrismaClient, UserRole } from '@prisma/client';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { sendVerificationEmail } from '../services/emailService';
 
 const prisma = new PrismaClient();
 
@@ -12,6 +14,13 @@ export const register = async (req: Request, res: Response) => {
 
         if (!email || !username || !password) {
             res.status(400).json({ error: 'Email, username, and password are required' });
+            return;
+        }
+
+        // Enforce strict password complexity (8+ chars, upper, lower, number, special)
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(password)) {
+            res.status(400).json({ error: 'SECURITY POLICY FAILURE: Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (e.g., @$!%*?&).' });
             return;
         }
 
@@ -30,7 +39,10 @@ export const register = async (req: Request, res: Response) => {
         // Hash password
         const passwordHash = await argon2.hash(password);
 
-        // Create user (Default role: LEARNER)
+        // Generate a secure verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
+        // Create user (Default role: LEARNER, isEmailVerified: false)
         const newUser = await prisma.user.create({
             data: {
                 email,
@@ -38,30 +50,18 @@ export const register = async (req: Request, res: Response) => {
                 passwordHash,
                 firstName,
                 lastName,
-                role: UserRole.LEARNER
+                role: UserRole.LEARNER,
+                verificationToken
             }
         });
 
-        // Generate Token
-        const token = jwt.sign(
-            { userId: newUser.id, role: newUser.role },
-            process.env.JWT_SECRET || 'secret',
-            { expiresIn: '1d' }
-        );
+        // Dispatch verification email
+        await sendVerificationEmail(newUser.email, verificationToken);
 
-        // Initial role-based logic could go here (e.g. creating a learner profile)
-
+        // Do not auto-login; mandate verification first.
         res.status(201).json({
-            message: 'User registered successfully',
-            user: {
-                id: newUser.id,
-                email: newUser.email,
-                username: newUser.username,
-                role: newUser.role,
-                xp: newUser.xp,
-                rank: newUser.rank
-            },
-            token
+            message: 'Identity registered successfully. Please check your secure email to verify your account and complete clearance.',
+            requiresVerification: true
         });
 
     } catch (error) {
@@ -85,6 +85,12 @@ export const login = async (req: Request, res: Response) => {
 
         if (!user) {
             res.status(401).json({ error: 'Invalid credentials' });
+            return;
+        }
+
+        // Check Email Verification Gate
+        if (!user.isEmailVerified) {
+            res.status(403).json({ error: 'ACCESS DENIED: Email verification pending. Please check your inbox and verify your identity.' });
             return;
         }
 
@@ -125,5 +131,43 @@ export const login = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Login Error:', error);
         res.status(500).json({ error: 'Internal server error during login' });
+    }
+};
+
+// Verify Email
+export const verifyEmail = async (req: Request, res: Response) => {
+    try {
+        const { token } = req.query;
+
+        if (!token || typeof token !== 'string') {
+            res.status(400).json({ error: 'Invalid verification token' });
+            return;
+        }
+
+        const user = await prisma.user.findFirst({
+            where: { verificationToken: token }
+        });
+
+        if (!user) {
+            res.status(400).json({ error: 'Invalid or expired verification token' });
+            return;
+        }
+
+        // Update user state
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                isEmailVerified: true,
+                verificationToken: null // Burn the token
+            }
+        });
+
+        // Redirect user to the frontend login page with a success message
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/login?verified=true`);
+
+    } catch (error) {
+        console.error('Email Verification Error:', error);
+        res.status(500).json({ error: 'Internal server error during verification' });
     }
 };

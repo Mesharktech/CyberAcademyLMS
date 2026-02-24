@@ -21,8 +21,10 @@ model User {
   role         UserRole  @default(LEARNER)
   firstName    String?
   lastName     String?
-  isActive     Boolean   @default(true)
-  xp           Int       @default(0)
+  isActive          Boolean   @default(true)
+  isEmailVerified   Boolean   @default(false)
+  verificationToken String?
+  xp                Int       @default(0)
   rank         Int       @default(1)
   lastLoginAt  DateTime?
   createdAt    DateTime  @default(now())

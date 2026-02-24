@@ -1,0 +1,12 @@
+-- AlterTable
+ALTER TABLE "Course" ADD COLUMN     "requiredRank" INTEGER NOT NULL DEFAULT 1;
+
+-- AlterTable
+ALTER TABLE "Module" ADD COLUMN     "requiredRank" INTEGER NOT NULL DEFAULT 1,
+ADD COLUMN     "xpReward" INTEGER NOT NULL DEFAULT 50;
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "isEmailVerified" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "rank" INTEGER NOT NULL DEFAULT 1,
+ADD COLUMN     "verificationToken" TEXT,
+ADD COLUMN     "xp" INTEGER NOT NULL DEFAULT 0;
