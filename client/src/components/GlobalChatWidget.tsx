@@ -67,9 +67,8 @@ export const GlobalChatWidget: React.FC = () => {
 
             {/* Chat Window */}
             <div
-                className={`fixed bottom-[80px] sm:bottom-[100px] right-4 sm:right-8 z-50 w-[calc(100vw-32px)] sm:w-[380px] md:w-[450px] glass-premium rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 origin-bottom-right flex flex-col ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-10 pointer-events-none'
+                className={`fixed bottom-[75px] sm:bottom-[100px] right-4 sm:right-8 z-50 w-[calc(100vw-32px)] sm:w-[380px] md:w-[450px] h-[50dvh] sm:h-[650px] max-h-[500px] sm:max-h-[calc(100vh-100px)] bg-[#050505] shadow-[0_0_50px_rgba(0,0,0,0.8)] sm:bg-transparent sm:shadow-none sm:glass-premium border border-white/10 rounded-2xl sm:rounded-3xl overflow-hidden transition-all duration-500 origin-bottom-right flex flex-col ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-10 pointer-events-none'
                     }`}
-                style={{ height: '700px', maxHeight: 'calc(100vh - 100px)' }}
             >
                 {/* Header */}
                 <div className="p-4 sm:p-6 border-b border-white/10 bg-black/60 relative overflow-hidden flex flex-col justify-center">
