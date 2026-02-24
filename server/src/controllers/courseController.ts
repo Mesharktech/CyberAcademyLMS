@@ -60,6 +60,16 @@ export const getCourses = async (req: Request, res: Response) => {
             }
         });
 
+        // Fetch enrollments to determine if user bought the course
+        let enrolledCourseIds = new Set<string>();
+        if (userId) {
+            const enrollments = await db.enrollment.findMany({
+                where: { userId, status: 'COMPLETED' },
+                select: { courseId: true }
+            });
+            enrollments.forEach((e: any) => enrolledCourseIds.add(e.courseId));
+        }
+
         // Calculate progress if user is logged in
         const coursesWithProgress = await Promise.all(courses.map(async (course) => {
             let progress = 0;
@@ -83,6 +93,7 @@ export const getCourses = async (req: Request, res: Response) => {
             return {
                 ...course,
                 progress,
+                enrolled: enrolledCourseIds.has(course.id) || Number(course.price) === 0,
                 completedModules,
                 totalModules: course.modules.length
             };

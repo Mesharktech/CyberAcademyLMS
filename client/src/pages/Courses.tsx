@@ -13,6 +13,7 @@ interface Course {
         username: string;
     };
     modules: any[];
+    enrolled?: boolean;
 }
 
 export const Courses: React.FC = () => {
@@ -75,7 +76,11 @@ export const Courses: React.FC = () => {
                                 <span className="text-[10px] font-mono tracking-widest uppercase border border-cyan-400/30 text-cyan-400 px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(0,240,255,0.1)_inset]">
                                     {course.instructor.username === 'admin' ? 'OFFICIAL CURRICULUM' : 'COMMUNITY'}
                                 </span>
-                                {Number(course.price) > 0 ? (
+                                {course.enrolled ? (
+                                    <span className="text-[10px] font-mono tracking-widest uppercase bg-purple-500/20 text-purple-400 px-3 py-1.5 rounded-full font-bold">
+                                        ENROLLED
+                                    </span>
+                                ) : Number(course.price) > 0 ? (
                                     <span className="text-[10px] font-mono tracking-widest uppercase bg-yellow-500/20 text-yellow-400 px-3 py-1.5 rounded-full font-bold">
                                         ${Number(course.price).toFixed(2)}
                                     </span>

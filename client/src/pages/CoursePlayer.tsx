@@ -36,6 +36,7 @@ export const CoursePlayer: React.FC = () => {
     const [completedModules, setCompletedModules] = useState<Set<string>>(new Set());
     const [enrolled, setEnrolled] = useState<boolean | null>(null);
     const [showPayment, setShowPayment] = useState(false);
+    const [courseCompleted, setCourseCompleted] = useState(false);
 
     const markAsComplete = async (moduleId: string) => {
         try {
@@ -61,7 +62,7 @@ export const CoursePlayer: React.FC = () => {
         if (currentModuleIndex < course.modules.length - 1) {
             setCurrentModuleIndex(prev => prev + 1);
         } else {
-            navigate('/');
+            setCourseCompleted(true);
         }
     };
 
@@ -179,6 +180,46 @@ export const CoursePlayer: React.FC = () => {
             <h2 className="text-4xl text-purple-400 font-orbitron mb-4 font-bold">EMPTY DIRECTORY</h2>
             <p className="text-gray-400 mb-8 font-mono tracking-widest">AWAITING PAYLOAD INJECTION...</p>
             <button onClick={() => navigate('/courses')} className="premium-button">RETURN TO BASE</button>
+        </div>
+    );
+
+    if (courseCompleted) return (
+        <div className="flex flex-col items-center justify-center min-h-[70vh] text-center animate-in zoom-in fade-in duration-1000">
+            <div className="absolute w-[600px] h-[600px] bg-green-500/10 blur-[150px] rounded-full pointer-events-none"></div>
+            <div className="glass-premium p-12 rounded-3xl border border-green-500/30 max-w-2xl relative z-10 bg-black/40 overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-400 to-transparent"></div>
+                <Medal size={80} className="text-green-400 mx-auto mb-6 drop-shadow-[0_0_20px_rgba(0,255,100,0.5)] animate-bounce" />
+                <h1 className="text-4xl md:text-5xl font-bold text-white font-orbitron mb-4">
+                    OPERATION <span className="text-green-400">SUCCESSFUL</span>
+                </h1>
+                <p className="text-gray-300 text-lg mb-8 leading-relaxed">
+                    Congratulations! You have successfully completed the <strong className="text-cyan-400">{course.title}</strong> curriculum. Your security clearance has been elevated.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    {user && (
+                        <button
+                            onClick={() => {
+                                generateCertificate({
+                                    userName: user.username || user.email,
+                                    courseName: course.title,
+                                    completionDate: new Date(),
+                                    instructorName: course.instructor?.username || 'System Administrator'
+                                });
+                            }}
+                            className="px-6 py-4 rounded-xl font-bold tracking-widest text-sm flex items-center justify-center gap-3 transition-all duration-300 bg-green-500/20 text-green-400 border border-green-400/50 hover:bg-green-500/30 hover:scale-105 shadow-[0_0_20px_rgba(0,255,100,0.2)]"
+                        >
+                            <Medal size={18} /> CLAIM CERTIFICATE
+                        </button>
+                    )}
+                    <button
+                        onClick={() => navigate('/courses')}
+                        className="premium-button px-6 py-4"
+                    >
+                        RETURN TO DATABANKS
+                    </button>
+                </div>
+            </div>
         </div>
     );
 
