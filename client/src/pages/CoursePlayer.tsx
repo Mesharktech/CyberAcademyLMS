@@ -81,21 +81,23 @@ export const CoursePlayer: React.FC = () => {
                 } else {
                     setError('Unknown error');
                 }
-            } finally {
-                setLoading(false);
+                setLoading(false); // Only end loading here if fetching the core course fatals
             }
         };
         fetchCourse();
     }, [slug, navigate]);
 
-    // Check enrollment for paid courses
+    // Check enrollment for paid courses, and then release the loading lock
     useEffect(() => {
         if (!course) return;
         const price = Number(course.price || 0);
+
         if (price === 0) {
             setEnrolled(true);
+            setLoading(false); // Free course, we can stop loading immediately
             return;
         }
+
         const checkEnrollment = async () => {
             try {
                 const res = await api.get(`/payments/check/${course.id}`);
@@ -104,6 +106,8 @@ export const CoursePlayer: React.FC = () => {
             } catch {
                 setEnrolled(false);
                 setShowPayment(true);
+            } finally {
+                setLoading(false); // Enrollment strictly checked, safe to render UI now
             }
         };
         checkEnrollment();
