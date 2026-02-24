@@ -8,7 +8,7 @@ const db = prisma as any; // Bypass TS errors until prisma generate runs
 // Create a new course
 export const createCourse = async (req: AuthRequest, res: Response) => {
     try {
-        const { title, slug, description, price } = req.body;
+        const { title, slug, description, price, requiredRank } = req.body;
         const instructorId = req.user?.userId;
 
         if (!title || !slug || !instructorId) {
@@ -22,6 +22,7 @@ export const createCourse = async (req: AuthRequest, res: Response) => {
                 slug,
                 description,
                 price: price || 0,
+                requiredRank: requiredRank ? parseInt(String(requiredRank)) : 1,
                 instructorId
             }
         });
@@ -178,12 +179,16 @@ export const updateProgress = async (req: AuthRequest, res: Response) => {
             return;
         }
 
+        // 1. Check if progress already exists and is completed (to prevent unlimited farming)
+        const existingProgress = await prisma.userProgress.findUnique({
+            where: { userId_moduleId: { userId, moduleId } }
+        });
+
+        const wasAlreadyCompleted = existingProgress?.completed === true;
+
         const progress = await prisma.userProgress.upsert({
             where: {
-                userId_moduleId: {
-                    userId,
-                    moduleId
-                }
+                userId_moduleId: { userId, moduleId }
             },
             update: {
                 completed: completed ?? true,
@@ -195,6 +200,30 @@ export const updateProgress = async (req: AuthRequest, res: Response) => {
                 completed: completed ?? true
             }
         });
+
+        // 2. Award XP if this is the first time completing the module
+        if (completed && !wasAlreadyCompleted) {
+            const module = await prisma.module.findUnique({ where: { id: moduleId } });
+
+            // Use the module's specific XP reward from the database, fallback to 50
+            let xpToAward = module?.xpReward || 50;
+
+            // Fetch user to update XP and calculate Rank
+            const userBefore = await prisma.user.findUnique({ where: { id: userId } });
+            if (userBefore && userBefore.role !== UserRole.ADMIN) {
+                const newXp = (userBefore.xp || 0) + xpToAward;
+
+                let newRank = 1; // Trainee (100 XP)
+                if (newXp >= 1000) newRank = 2; // Operative
+                if (newXp >= 5000) newRank = 3; // Specialist
+                if (newXp >= 15000) newRank = 4; // Ghost
+
+                await prisma.user.update({
+                    where: { id: userId },
+                    data: { xp: newXp, rank: newRank }
+                });
+            }
+        }
 
         console.log("Successfully upserted progress:", progress);
 
@@ -266,7 +295,7 @@ export const getCourseBySlug = async (req: Request, res: Response) => {
 export const addModule = async (req: AuthRequest, res: Response) => {
     try {
         const { courseId } = req.params as { courseId: string };
-        const { title, type, content, videoUrl, orderIndex } = req.body;
+        const { title, type, content, videoUrl, orderIndex, xpReward, requiredRank } = req.body;
 
         // Verify ownership (or Admin)
         const course = await prisma.course.findUnique({ where: { id: courseId } });
@@ -287,7 +316,9 @@ export const addModule = async (req: AuthRequest, res: Response) => {
                 type,
                 content,
                 videoUrl,
-                orderIndex
+                orderIndex,
+                xpReward: xpReward !== undefined ? parseInt(String(xpReward)) : 50,
+                requiredRank: requiredRank !== undefined ? parseInt(String(requiredRank)) : 1
             }
         });
 
@@ -302,7 +333,7 @@ export const addModule = async (req: AuthRequest, res: Response) => {
 export const updateCourse = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params as { id: string };
-        const { title, description, thumbnailUrl, price } = req.body;
+        const { title, description, thumbnailUrl, price, requiredRank } = req.body;
 
         const course = await prisma.course.findUnique({ where: { id } });
         if (!course) { res.status(404).json({ error: 'Course not found' }); return; }
@@ -315,6 +346,7 @@ export const updateCourse = async (req: AuthRequest, res: Response) => {
         if (description !== undefined) updateData.description = description;
         if (thumbnailUrl !== undefined) updateData.thumbnailUrl = thumbnailUrl;
         if (price !== undefined && price !== null) updateData.price = parseFloat(String(price));
+        if (requiredRank !== undefined && requiredRank !== null) updateData.requiredRank = parseInt(String(requiredRank));
 
         const updated = await prisma.course.update({
             where: { id },
@@ -368,7 +400,7 @@ export const publishCourse = async (req: AuthRequest, res: Response) => {
 export const updateModule = async (req: AuthRequest, res: Response) => {
     try {
         const { moduleId } = req.params as { moduleId: string };
-        const { title, type, content, videoUrl, orderIndex } = req.body;
+        const { title, type, content, videoUrl, orderIndex, xpReward, requiredRank } = req.body;
 
         const module = await prisma.module.findUnique({ where: { id: moduleId }, include: { course: true } });
         if (!module) { res.status(404).json({ error: 'Module not found' }); return; }
@@ -376,9 +408,13 @@ export const updateModule = async (req: AuthRequest, res: Response) => {
             res.status(403).json({ error: 'Not authorized' }); return;
         }
 
+        const updateData: any = { title, type, content, videoUrl, orderIndex };
+        if (xpReward !== undefined) updateData.xpReward = parseInt(String(xpReward));
+        if (requiredRank !== undefined) updateData.requiredRank = parseInt(String(requiredRank));
+
         const updated = await prisma.module.update({
             where: { id: moduleId },
-            data: { title, type, content, videoUrl, orderIndex }
+            data: updateData
         });
         res.json(updated);
     } catch (error) {

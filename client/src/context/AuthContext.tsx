@@ -7,6 +7,8 @@ interface User {
     username: string;
     email: string;
     role: 'ADMIN' | 'INSTRUCTOR' | 'LEARNER';
+    xp?: number;
+    rank?: number;
 }
 
 interface AuthContextType {

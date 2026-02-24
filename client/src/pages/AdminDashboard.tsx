@@ -9,6 +9,7 @@ import {
 interface Module {
     id: string; title: string; type: 'TEXT' | 'VIDEO' | 'QUIZ' | 'LAB';
     orderIndex: number; content?: string; videoUrl?: string;
+    xpReward?: number; requiredRank?: number;
 }
 interface Course {
     id: string; title: string; slug: string; description?: string;
@@ -36,8 +37,8 @@ const StatCard = ({ icon: Icon, label, value, color }: { icon: any; label: strin
 type ModuleType = 'TEXT' | 'VIDEO' | 'QUIZ' | 'LAB';
 
 const emptyCourse = () => ({ title: '', slug: '', description: '', thumbnailUrl: '', price: 0 });
-const emptyModule = (courseId: string, orderIndex: number): { courseId: string; title: string; type: ModuleType; content: string; videoUrl: string; orderIndex: number } => ({
-    courseId, title: '', type: 'TEXT', content: '', videoUrl: '', orderIndex
+const emptyModule = (courseId: string, orderIndex: number): { courseId: string; title: string; type: ModuleType; content: string; videoUrl: string; orderIndex: number; xpReward: number; requiredRank: number } => ({
+    courseId, title: '', type: 'TEXT', content: '', videoUrl: '', orderIndex, xpReward: 50, requiredRank: 1
 });
 
 // ─── Main Admin Dashboard ─────────────────────────────────────
@@ -124,7 +125,11 @@ const AdminDashboard: React.FC = () => {
         setModuleModal('create');
     };
     const openEditModule = (courseId: string, m: Module) => {
-        setModuleForm({ courseId, title: m.title, type: m.type, content: m.content || '', videoUrl: m.videoUrl || '', orderIndex: m.orderIndex });
+        setModuleForm({
+            courseId, title: m.title, type: m.type, content: m.content || '',
+            videoUrl: m.videoUrl || '', orderIndex: m.orderIndex,
+            xpReward: m.xpReward || 50, requiredRank: m.requiredRank || 1
+        });
         setEditingModuleId(m.id);
         setModuleModal('edit');
     };
@@ -325,6 +330,26 @@ const AdminDashboard: React.FC = () => {
                                         className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${moduleForm.type === t ? 'bg-cyan-500 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
                                     >{t}</button>
                                 ))}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">XP Reward</label>
+                                <input
+                                    type="number" min={0} step={1}
+                                    value={moduleForm.xpReward}
+                                    onChange={e => setModuleForm(f => f ? { ...f, xpReward: parseInt(e.target.value) || 0 } : f)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Required Rank (1-5)</label>
+                                <input
+                                    type="number" min={1} max={5} step={1}
+                                    value={moduleForm.requiredRank}
+                                    onChange={e => setModuleForm(f => f ? { ...f, requiredRank: parseInt(e.target.value) || 1 } : f)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50 transition-colors"
+                                />
                             </div>
                         </div>
                         {moduleForm.type === 'TEXT' && (

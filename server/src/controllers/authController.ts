@@ -57,7 +57,9 @@ export const register = async (req: Request, res: Response) => {
                 id: newUser.id,
                 email: newUser.email,
                 username: newUser.username,
-                role: newUser.role
+                role: newUser.role,
+                xp: newUser.xp,
+                rank: newUser.rank
             },
             token
         });
@@ -113,7 +115,9 @@ export const login = async (req: Request, res: Response) => {
                 id: user.id,
                 email: user.email,
                 username: user.username,
-                role: user.role
+                role: user.role,
+                xp: user.xp,
+                rank: user.rank
             },
             token
         });

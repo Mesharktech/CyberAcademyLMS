@@ -11,6 +11,10 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
         const role = req.user?.role;
         if (!userId) { res.status(401).json({ error: 'Unauthorized' }); return; }
 
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const userXp = user?.xp || 0;
+        const userRank = user?.rank || 1;
+
         // 1. Calculate Active Ops (enrolled courses)
         let activeOpsCount = 0;
         if (role === 'ADMIN') {
@@ -68,7 +72,9 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
             activeOps: activeOpsCount,
             fieldTime: totalFieldTimeHours,
             globalRank: rankPercentile,
-            latestIntel: formattedIntel
+            latestIntel: formattedIntel,
+            xp: userXp,
+            rank: userRank
         });
 
     } catch (error) {

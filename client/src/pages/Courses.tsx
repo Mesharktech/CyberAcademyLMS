@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { BookOpen, Terminal, Cpu } from 'lucide-react';
+import { BookOpen, Terminal, Cpu, Lock } from 'lucide-react';
 
 interface Course {
     id: string;
@@ -14,9 +15,11 @@ interface Course {
     };
     modules: any[];
     enrolled?: boolean;
+    requiredRank: number;
 }
 
 export const Courses: React.FC = () => {
+    const { user } = useAuth();
     const [courses, setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -62,56 +65,50 @@ export const Courses: React.FC = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
-                    {courses.map((course) => (
-                        <Link
-                            to={`/courses/${course.slug}`}
-                            key={course.id}
-                            className="group glass-premium rounded-2xl p-8 hover:border-cyan-500/50 hover:shadow-[0_10px_40px_rgba(0,240,255,0.15)] transition-all duration-500 hover:-translate-y-2 relative overflow-hidden flex flex-col h-[320px]"
-                        >
-                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 group-hover:text-purple-400 transition-all duration-500 transform group-hover:scale-110">
-                                <Cpu size={120} />
-                            </div>
+                    {courses.map((course) => {
+                        const userRank = user?.rank || (user?.role === 'ADMIN' ? 99 : 1);
+                        const isLocked = userRank < (course.requiredRank || 1);
 
-                            <div className="mb-6 relative z-10">
-                                <span className="text-[10px] font-mono tracking-widest uppercase border border-cyan-400/30 text-cyan-400 px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(0,240,255,0.1)_inset]">
-                                    {course.instructor.username === 'admin' ? 'OFFICIAL CURRICULUM' : 'COMMUNITY'}
-                                </span>
-                                {course.enrolled ? (
-                                    <span className="text-[10px] font-mono tracking-widest uppercase bg-purple-500/20 text-purple-400 px-3 py-1.5 rounded-full font-bold">
-                                        ENROLLED
-                                    </span>
-                                ) : Number(course.price) > 0 ? (
-                                    <span className="text-[10px] font-mono tracking-widest uppercase bg-yellow-500/20 text-yellow-400 px-3 py-1.5 rounded-full font-bold">
-                                        ${Number(course.price).toFixed(2)}
-                                    </span>
-                                ) : (
-                                    <span className="text-[10px] font-mono tracking-widest uppercase bg-green-500/20 text-green-400 px-3 py-1.5 rounded-full font-bold">
-                                        FREE
-                                    </span>
-                                )}
-                            </div>
-
-                            <h3 className="text-2xl font-bold text-gray-100 mb-3 font-orbitron group-hover:text-white transition-colors line-clamp-2 relative z-10">
-                                {course.title}
-                            </h3>
-
-                            <p className="text-gray-400 text-sm mb-6 flex-grow line-clamp-3 leading-relaxed relative z-10 group-hover:text-gray-300 transition-colors">
-                                {course.description || "No briefing available for this operation."}
-                            </p>
-
-                            <div className="flex items-center justify-between border-t border-white/5 pt-5 mt-auto relative z-10">
-                                <div className="flex items-center gap-3 text-gray-500 text-xs font-mono tracking-widest">
-                                    <BookOpen size={16} className="text-purple-400/70" />
-                                    <span>TEXT MODULE</span>
+                        return (
+                            <Link
+                                to={isLocked ? '#' : `/courses/${course.slug}`}
+                                key={course.id}
+                                className={`group glass-premium rounded-2xl p-8 transition-all duration-500 relative overflow-hidden flex flex-col h-[320px] 
+                                    ${isLocked ? 'opacity-50 cursor-not-allowed grayscale-[50%]' : 'hover:border-cyan-500/50 hover:shadow-[0_10px_40px_rgba(0,240,255,0.15)] hover:-translate-y-2'}`}
+                                onClick={(e) => isLocked && e.preventDefault()}
+                            >
+                                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 group-hover:text-purple-400 transition-all duration-500 transform group-hover:scale-110">
+                                    {isLocked ? <Lock size={120} /> : <Cpu size={120} />}
                                 </div>
-                                <div className="text-cyan-400 text-xs font-bold uppercase tracking-widest group-hover:translate-x-2 transition-transform duration-300 flex items-center gap-2">
-                                    INITIALIZE <Terminal size={14} className="animate-pulse-slow" />
-                                </div>
-                            </div>
 
-                            <div className="absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-cyan-400 via-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        </Link>
-                    ))}
+                                <div className="mb-6 relative z-10 flex gap-2">
+                                    <span className={`text-[10px] font-mono tracking-widest uppercase border border-current px-3 py-1.5 rounded-full shadow-[0_0_10px_currentColor_inset] ${isLocked ? 'text-red-400 border-red-400/30' : 'text-cyan-400 border-cyan-400/30'}`}>
+                                        {isLocked ? `RANK ${course.requiredRank} REQUIRED` : (course.instructor.username === 'admin' ? 'OFFICIAL CURRICULUM' : 'COMMUNITY')}
+                                    </span>
+                                </div>
+
+                                <h3 className={`text-2xl font-bold mb-3 font-orbitron line-clamp-2 relative z-10 transition-colors ${isLocked ? 'text-gray-500' : 'text-gray-100 group-hover:text-white'}`}>
+                                    {course.title}
+                                </h3>
+
+                                <p className={`text-sm mb-6 flex-grow line-clamp-3 leading-relaxed relative z-10 transition-colors ${isLocked ? 'text-gray-600' : 'text-gray-400 group-hover:text-gray-300'}`}>
+                                    {course.description || "No briefing available for this operation."}
+                                </p>
+
+                                <div className={`flex items-center justify-between border-t border-white/5 pt-5 mt-auto relative z-10 ${isLocked ? 'opacity-50' : ''}`}>
+                                    <div className="flex items-center gap-3 text-gray-500 text-xs font-mono tracking-widest">
+                                        <BookOpen size={16} className={isLocked ? 'text-gray-600' : 'text-purple-400/70'} />
+                                        <span>TEXT MODULE</span>
+                                    </div>
+                                    <div className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-transform duration-300 ${isLocked ? 'text-red-500' : 'text-cyan-400 group-hover:translate-x-2'}`}>
+                                        {isLocked ? 'ACCESS DENIED' : 'INITIALIZE'} {isLocked ? <Lock size={14} /> : <Terminal size={14} className="animate-pulse-slow" />}
+                                    </div>
+                                </div>
+
+                                {!isLocked && <div className="absolute bottom-0 left-0 h-1.5 w-full bg-gradient-to-r from-cyan-400 via-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>}
+                            </Link>
+                        );
+                    })}
                 </div>
             )}
         </div>

@@ -21,7 +21,9 @@ export const Dashboard: React.FC = () => {
         activeOps: 0,
         fieldTime: 0,
         globalRank: 99,
-        latestIntel: [] as { title: string, date: string }[]
+        latestIntel: [] as { title: string, date: string }[],
+        xp: 0,
+        rank: 1
     });
     const [loading, setLoading] = useState(true);
 
@@ -43,6 +45,32 @@ export const Dashboard: React.FC = () => {
         fetchData();
     }, []);
 
+    const rankTitles: Record<number, string> = {
+        0: 'GUEST',
+        1: 'TRAINEE',
+        2: 'OPERATIVE',
+        3: 'SPECIALIST',
+        4: 'GHOST',
+        5: 'SYSTEM ADMIN'
+    };
+
+    const getRankTitle = () => {
+        if (user?.role === 'ADMIN') return 'SYSTEM ADMIN';
+        return rankTitles[stats.rank] || 'TRAINEE';
+    };
+
+    const getNextRankXp = () => {
+        if (stats.xp < 100) return 100;
+        if (stats.xp < 1000) return 1000;
+        if (stats.xp < 5000) return 5000;
+        if (stats.xp < 15000) return 15000;
+        return 15000; // Max level
+    };
+
+    const nextXp = getNextRankXp();
+    const currentXp = stats.xp;
+    const rankProgress = user?.role === 'ADMIN' ? 100 : Math.min(100, Math.round((currentXp / nextXp) * 100));
+
     return (
         <div className="space-y-10 animate-in fade-in duration-1000">
             {/* Header Section */}
@@ -54,11 +82,31 @@ export const Dashboard: React.FC = () => {
                     <h1 className="text-5xl font-bold text-white mb-4 font-sans tracking-tight">
                         Welcome back, <span className="text-gradient-primary">{user?.username}</span>
                     </h1>
-                    <p className="text-gray-400 flex items-center gap-4 text-lg font-light">
-                        Level: <span className="text-gray-200 font-mono tracking-widest">Senior Operative</span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(0,240,255,0.8)]"></span>
-                        Role: <span className="text-cyan-400 uppercase tracking-widest text-xs border border-cyan-400/30 px-3 py-1 rounded-full shadow-[0_0_15px_rgba(0,240,255,0.2)_inset]">{user?.role}</span>
-                    </p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-6 mt-6">
+                        <p className="text-gray-400 flex items-center gap-4 text-lg font-light">
+                            Level: <span className={`font-mono tracking-widest font-bold ${user?.role === 'ADMIN' ? 'text-red-500' : 'text-cyan-400'}`}>{getRankTitle()}</span>
+                        </p>
+
+                        {user?.role !== 'ADMIN' && (
+                            <div className="flex-grow max-w-md bg-black/40 p-3 rounded-xl border border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.5)_inset]">
+                                <div className="flex justify-between text-xs font-mono tracking-widest mb-2">
+                                    <span className="text-purple-400">XP {currentXp}</span>
+                                    <span className="text-gray-500">NEXT RANK: {nextXp}</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-black/60 rounded-full overflow-hidden border border-white/5">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 transition-all duration-1000 ease-out"
+                                        style={{ width: `${rankProgress}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+                        )}
+
+                        <p className="text-gray-400 flex items-center gap-4 text-lg font-light sm:ml-auto">
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(0,240,255,0.8)] hidden sm:block"></span>
+                            Role: <span className="text-gray-300 uppercase tracking-widest text-xs border border-white/10 bg-white/5 px-3 py-1 rounded-full">{user?.role}</span>
+                        </p>
+                    </div>
                 </div>
             </div>
 
