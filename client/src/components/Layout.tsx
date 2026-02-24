@@ -20,8 +20,12 @@ export const Layout: React.FC = () => {
     return (
         <div className="min-h-screen text-gray-200 font-sans selection:bg-cyan-500/30 selection:text-cyan-100 overflow-x-hidden w-full">
             <nav className="glass-premium sticky top-0 z-50 px-4 sm:px-8 py-3 sm:py-5 flex justify-between items-center border-b border-white/5 mx-2 sm:mx-4 mt-2 sm:mt-4 rounded-xl sm:rounded-2xl">
-                <div className="flex items-center space-x-2 sm:space-x-4 group cursor-pointer" onClick={() => navigate('/')}>
-                    <img src="/logo.png" alt="Sherk Academy" className="h-12 sm:h-16 object-contain group-hover:drop-shadow-[0_0_15px_rgba(0,240,255,0.6)] transition-all duration-300" />
+                <div className="flex items-center space-x-3 sm:space-x-4 group cursor-pointer" onClick={() => navigate('/')}>
+                    <img src="/logo-icon.png" alt="Sherk Academy Logo" className="h-10 sm:h-14 object-contain group-hover:drop-shadow-[0_0_15px_rgba(0,240,255,0.6)] transition-all duration-300" />
+                    <div className="flex flex-col justify-center">
+                        <span className="text-lg sm:text-xl font-bold font-orbitron tracking-widest text-white leading-none group-hover:text-cyan-300 transition-colors">SHERK</span>
+                        <span className="text-[10px] sm:text-xs font-bold font-mono tracking-widest text-cyan-400 uppercase leading-tight group-hover:text-white transition-colors">Academy</span>
+                    </div>
                 </div>
 
                 <div className="flex items-center space-x-2 sm:space-x-8">
