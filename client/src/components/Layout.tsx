@@ -13,7 +13,7 @@ export const Layout: React.FC = () => {
     const handleLogout = () => {
         logout();
         setMobileMenuOpen(false);
-        navigate('/login');
+        navigate('/register');
     };
 
 

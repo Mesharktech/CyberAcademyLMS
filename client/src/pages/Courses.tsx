@@ -71,7 +71,7 @@ export const Courses: React.FC = () => {
 
                         return (
                             <Link
-                                to={isLocked ? '#' : (!user ? '/login' : `/courses/${course.slug}`)}
+                                to={isLocked ? '#' : (!user ? '/register' : `/courses/${course.slug}`)}
                                 key={course.id}
                                 className={`group glass-premium rounded-2xl p-8 transition-all duration-500 relative overflow-hidden flex flex-col h-[320px] 
                                     ${isLocked ? 'opacity-50 cursor-not-allowed grayscale-[50%]' : 'hover:border-cyan-500/50 hover:shadow-[0_10px_40px_rgba(0,240,255,0.15)] hover:-translate-y-2'}`}
@@ -101,7 +101,7 @@ export const Courses: React.FC = () => {
                                         <span>TEXT MODULE</span>
                                     </div>
                                     <div className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-transform duration-300 ${isLocked ? 'text-red-500' : 'text-cyan-400 group-hover:translate-x-2'}`}>
-                                        {isLocked ? 'ACCESS DENIED' : (!user ? 'LOGIN REQUIRED' : 'INITIALIZE')} {isLocked ? <Lock size={14} /> : <Terminal size={14} className="animate-pulse-slow" />}
+                                        {isLocked ? 'ACCESS DENIED' : (!user ? 'INITIALIZE SYSTEM' : 'INITIALIZE')} {isLocked ? <Lock size={14} /> : <Terminal size={14} className="animate-pulse-slow" />}
                                     </div>
                                 </div>
 

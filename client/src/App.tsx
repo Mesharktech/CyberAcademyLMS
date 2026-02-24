@@ -18,7 +18,7 @@ const queryClient = new QueryClient();
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-hackon-green font-mono">INITIALIZING...</div>;
-  return user ? <>{children}</> : <Navigate to="/login" />;
+  return user ? <>{children}</> : <Navigate to="/register" />;
 };
 
 function App() {

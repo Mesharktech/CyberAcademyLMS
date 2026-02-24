@@ -40,30 +40,29 @@ export const Register: React.FC = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-black text-gray-200 font-sans selection:bg-hackon-red selection:text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-hackon-red opacity-5 blur-[120px] rounded-full pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-hackon-green opacity-5 blur-[120px] rounded-full pointer-events-none"></div>
-
-            <div className="glass-panel p-8 rounded-xl w-full max-w-md border border-white/5 relative z-10">
-                <div className="flex flex-col items-center mb-8">
-                    <div className="bg-white/5 p-4 rounded-full mb-4 border border-white/10">
-                        <UserPlus className="text-hackon-red w-8 h-8" />
+        <div className="flex items-center justify-center min-h-[80vh]">
+            <div className="bg-gray-800 p-8 rounded-lg shadow-2xl border border-gray-700 w-full max-w-md">
+                <div className="flex flex-col items-center mb-6">
+                    <div className="bg-gray-700 p-3 rounded-full mb-3">
+                        <UserPlus className="text-cyan-400 w-8 h-8" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white font-orbitron tracking-wide">NEW OPERATIVE</h2>
-                    <p className="text-gray-400 text-sm mt-1 uppercase tracking-widest text-xs">Clearance Request</p>
+                    <h2 className="text-2xl font-bold text-white">New Operative</h2>
+                    <p className="text-gray-400 text-sm mt-1">Clearance Request</p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded mb-6 text-xs font-mono text-center">
+                    <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded mb-4 text-sm text-center">
                         {error}
                     </div>
                 )}
 
                 {success && (
-                    <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-4 rounded mb-6 text-sm font-mono text-center">
+                    <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-3 rounded mb-4 text-sm text-center">
                         {success}
                         <div className="mt-4">
-                            <Link to="/login" className="premium-button inline-block text-xs py-2 px-4 shadow-lg shadow-hackon-green/20">PROCEED TO LOGIN</Link>
+                            <Link to="/login" className="w-full inline-block bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2 px-4 rounded transition-all transform active:scale-95 text-center">
+                                Proceed to Login
+                            </Link>
                         </div>
                     </div>
                 )}
@@ -72,67 +71,67 @@ export const Register: React.FC = () => {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">First Name</label>
+                                <label className="block text-gray-400 text-sm mb-1">First Name</label>
                                 <input
                                     type="text"
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
+                                    className="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:border-cyan-500 transition-colors"
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Last Name</label>
+                                <label className="block text-gray-400 text-sm mb-1">Last Name</label>
                                 <input
                                     type="text"
                                     value={lastName}
                                     onChange={(e) => setLastName(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
+                                    className="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:border-cyan-500 transition-colors"
                                     required
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Username</label>
+                            <label className="block text-gray-400 text-sm mb-1">Username</label>
                             <input
                                 type="text"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
+                                className="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:border-cyan-500 transition-colors"
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Email Address</label>
+                            <label className="block text-gray-400 text-sm mb-1">Email Address</label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
+                                className="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:border-cyan-500 transition-colors"
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Password</label>
+                            <label className="block text-gray-400 text-sm mb-1">Password</label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
+                                className="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:border-cyan-500 transition-colors"
                                 required
                             />
                         </div>
                         <button
                             type="submit"
-                            className="hackon-button w-full py-3 mt-4 rounded font-bold shadow-lg shadow-red-900/20"
+                            className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2 px-4 rounded transition-all transform active:scale-95 mt-4"
                         >
-                            SUBMIT APPLICATION
+                            Submit Application
                         </button>
                     </form>
                 )}
 
-                <p className="text-center mt-6 text-gray-500 text-xs font-mono">
-                    Already authenticated? <Link to="/login" className="text-hackon-green hover:text-white transition-colors">ACCESS TERMINAL</Link>
+                <p className="text-center mt-6 text-gray-500 text-sm">
+                    Already have an account? <Link to="/login" className="text-cyan-400 hover:underline">Login here</Link>
                 </p>
             </div>
         </div>
