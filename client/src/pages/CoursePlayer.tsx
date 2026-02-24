@@ -184,12 +184,12 @@ export const CoursePlayer: React.FC = () => {
     );
 
     if (courseCompleted) return (
-        <div className="flex flex-col items-center justify-center min-h-[70vh] text-center animate-in zoom-in fade-in duration-1000">
-            <div className="absolute w-[600px] h-[600px] bg-green-500/10 blur-[150px] rounded-full pointer-events-none"></div>
-            <div className="glass-premium p-12 rounded-3xl border border-green-500/30 max-w-2xl relative z-10 bg-black/40 overflow-hidden">
+        <div className="flex flex-col items-center justify-center min-h-[70vh] text-center animate-in zoom-in fade-in duration-1000 p-4">
+            <div className="absolute w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-green-500/10 blur-[100px] sm:blur-[150px] rounded-full pointer-events-none"></div>
+            <div className="glass-premium p-6 sm:p-12 rounded-2xl sm:rounded-3xl border border-green-500/30 max-w-2xl relative z-10 bg-black/40 overflow-hidden w-full">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-400 to-transparent"></div>
-                <Medal size={80} className="text-green-400 mx-auto mb-6 drop-shadow-[0_0_20px_rgba(0,255,100,0.5)] animate-bounce" />
-                <h1 className="text-4xl md:text-5xl font-bold text-white font-orbitron mb-4">
+                <Medal size={60} className="text-green-400 mx-auto mb-6 drop-shadow-[0_0_20px_rgba(0,255,100,0.5)] animate-bounce sm:w-[80px] sm:h-[80px]" />
+                <h1 className="text-3xl md:text-5xl font-bold text-white font-orbitron mb-4 break-words">
                     OPERATION <span className="text-green-400">SUCCESSFUL</span>
                 </h1>
                 <p className="text-gray-300 text-lg mb-8 leading-relaxed">
@@ -224,9 +224,9 @@ export const CoursePlayer: React.FC = () => {
     );
 
     return (
-        <div className="h-[calc(100vh-140px)] flex flex-col lg:flex-row gap-8 animate-in fade-in duration-1000 relative">
+        <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 animate-in fade-in duration-1000 relative lg:h-[calc(100vh-140px)]">
             {/* Sidebar (Modules List) */}
-            <div className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-6 relative z-10">
+            <div className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-4 sm:gap-6 relative z-10 lg:h-full">
                 <button
                     onClick={() => navigate('/courses')}
                     className="flex items-center gap-3 text-gray-400 hover:text-cyan-400 transition-colors text-xs font-bold tracking-widest uppercase font-mono"
@@ -234,12 +234,12 @@ export const CoursePlayer: React.FC = () => {
                     <ArrowLeft size={16} /> ABORT OPERATION
                 </button>
 
-                <div className="glass-premium flex-grow rounded-2xl overflow-hidden flex flex-col border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-                    <div className="p-6 border-b border-white/5 bg-black/40 relative">
-                        <h2 className="font-bold text-white font-orbitron text-sm tracking-widest">MODULE SEQUENCE</h2>
-                        <div className="h-1 w-20 bg-gradient-to-r from-cyan-400 to-purple-500 mt-4 rounded-full"></div>
+                <div className="glass-premium flex-grow rounded-2xl overflow-hidden flex flex-col border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] max-h-[40vh] lg:max-h-full">
+                    <div className="p-4 sm:p-6 border-b border-white/5 bg-black/40 relative shrink-0">
+                        <h2 className="font-bold text-white font-orbitron text-xs sm:text-sm tracking-widest break-words">MODULE SEQUENCE</h2>
+                        <div className="h-1 w-12 sm:w-20 bg-gradient-to-r from-cyan-400 to-purple-500 mt-2 sm:mt-4 rounded-full"></div>
                     </div>
-                    <div className="overflow-y-auto p-4 space-y-2 custom-scrollbar flex-grow bg-black/20">
+                    <div className="overflow-y-auto p-3 sm:p-4 space-y-2 custom-scrollbar flex-grow bg-black/20">
                         {course.modules.map((mod, idx: number) => {
                             const isCompleted = completedModules.has(mod.id);
                             return (
@@ -259,7 +259,7 @@ export const CoursePlayer: React.FC = () => {
                                         }`}>
                                         {isCompleted ? '✓' : idx + 1}
                                     </div>
-                                    <span className="line-clamp-2 font-medium leading-relaxed">{mod.title}</span>
+                                    <span className="line-clamp-2 md:line-clamp-none lg:line-clamp-2 font-medium leading-relaxed">{mod.title}</span>
                                 </button>
                             );
                         })}
@@ -268,21 +268,21 @@ export const CoursePlayer: React.FC = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-grow flex flex-col min-h-0 relative">
-                <div className="absolute right-0 top-0 w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none -translate-y-1/3 translate-x-1/3"></div>
+            <div className="flex-grow flex flex-col min-h-0 relative lg:h-full lg:min-w-0">
+                <div className="absolute right-0 top-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-cyan-500/5 blur-[80px] md:blur-[120px] rounded-full pointer-events-none -translate-y-1/3 translate-x-1/3"></div>
                 <div className="glass-premium rounded-2xl flex-grow overflow-hidden flex flex-col border border-white/5 relative z-10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
 
                     {/* Header */}
-                    <div className="p-8 border-b border-white/5 bg-black/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+                    <div className="p-4 sm:p-8 border-b border-white/5 bg-black/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 sm:gap-6 relative overflow-hidden shrink-0">
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/5 to-transparent bg-[length:200%_100%] animate-cyber-border-anim opacity-50 z-0"></div>
-                        <div className="relative z-10">
-                            <h1 className="text-3xl font-bold text-white font-orbitron mb-3 drop-shadow-md">{currentModule?.title}</h1>
-                            <p className="text-gray-400 text-xs flex items-center gap-3 tracking-widest font-mono uppercase">
-                                <Terminal size={12} className="text-purple-400 animate-pulse-slow" />
-                                {course.title}
+                        <div className="relative z-10 w-full min-w-0">
+                            <h1 className="text-xl sm:text-3xl font-bold text-white font-orbitron mb-2 sm:mb-3 drop-shadow-md break-words">{currentModule?.title}</h1>
+                            <p className="text-gray-400 text-[10px] sm:text-xs flex items-center gap-2 sm:gap-3 tracking-widest font-mono uppercase truncate">
+                                <Terminal size={12} className="text-purple-400 animate-pulse-slow shrink-0" />
+                                <span className="truncate">{course.title}</span>
                             </p>
                         </div>
-                        <div className="flex gap-4 relative z-10">
+                        <div className="flex flex-wrap gap-2 sm:gap-4 relative z-10 w-full md:w-auto">
                             {course.modules.length > 0 && completedModules.size === course.modules.length && (
                                 <button
                                     onClick={() => {
@@ -310,11 +310,11 @@ export const CoursePlayer: React.FC = () => {
                     </div>
 
                     {/* Content Viewer */}
-                    <div className="flex-grow overflow-y-auto p-10 custom-scrollbar bg-black/40 relative z-10">
+                    <div className="flex-grow overflow-y-auto p-4 sm:p-10 custom-scrollbar bg-black/40 relative z-10 w-full">
                         {currentModule?.type === 'QUIZ' ? (
                             <div className="max-w-4xl mx-auto">
-                                <h2 className="text-3xl font-orbitron text-cyan-400 mb-8 border-b border-white/10 pb-4 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)] flex items-center gap-4">
-                                    <Terminal size={28} />
+                                <h2 className="text-xl sm:text-3xl font-orbitron text-cyan-400 mb-6 sm:mb-8 border-b border-white/10 pb-3 sm:pb-4 drop-shadow-[0_0_5px_rgba(0,240,255,0.5)] flex items-center gap-3 sm:gap-4 break-words">
+                                    <Terminal className="shrink-0 w-6 h-6 sm:w-7 sm:h-7" />
                                     Security Clearance Exam
                                 </h2>
                                 <QuizView
@@ -327,7 +327,7 @@ export const CoursePlayer: React.FC = () => {
                                 />
                             </div>
                         ) : currentModule?.type === 'LAB' ? (
-                            <div className="w-full flex justify-center items-center h-full">
+                            <div className="w-full flex justify-center items-center h-[500px] lg:h-full min-h-[400px]">
                                 <LinuxLabView
                                     onComplete={(passed) => {
                                         if (passed) {
@@ -337,7 +337,7 @@ export const CoursePlayer: React.FC = () => {
                                 />
                             </div>
                         ) : (
-                            <div className="prose prose-invert lg:prose-lg prose-p:text-gray-300 prose-p:leading-relaxed prose-headings:font-orbitron prose-headings:text-gray-100 prose-headings:tracking-wide prose-a:text-purple-400 prose-a:no-underline hover:prose-a:underline prose-strong:text-white prose-strong:font-bold prose-code:text-cyan-400 prose-pre:bg-[#0a0a0a] prose-pre:border prose-pre:border-white/10 prose-pre:shadow-[0_4px_20px_rgba(0,0,0,0.5)] max-w-4xl mx-auto">
+                            <div className="prose prose-sm sm:prose-base prose-invert lg:prose-lg prose-p:text-gray-300 prose-p:leading-relaxed prose-headings:font-orbitron prose-headings:text-gray-100 prose-headings:leading-normal prose-headings:break-words prose-a:text-purple-400 prose-a:no-underline hover:prose-a:underline prose-strong:text-white prose-strong:font-bold prose-code:text-cyan-400 prose-pre:bg-[#0a0a0a] prose-pre:border prose-pre:border-white/10 prose-pre:shadow-[0_4px_20px_rgba(0,0,0,0.5)] prose-pre:max-w-full prose-pre:overflow-x-auto max-w-4xl mx-auto w-full break-words">
                                 {currentModule?.content ? (
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {currentModule.content}
@@ -350,7 +350,7 @@ export const CoursePlayer: React.FC = () => {
                     </div>
 
                     {/* Footer / Controls */}
-                    <div className="p-6 border-t border-white/5 bg-black/60 flex justify-between items-center relative z-10">
+                    <div className="p-4 sm:p-6 border-t border-white/5 bg-black/60 flex justify-between items-center relative z-10 shrink-0">
                         <button
                             disabled={currentModuleIndex === 0}
                             onClick={() => setCurrentModuleIndex(prev => prev - 1)}
