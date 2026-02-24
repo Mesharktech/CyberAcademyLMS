@@ -17,13 +17,13 @@ export const Layout: React.FC = () => {
 
     return (
         <div className="min-h-screen text-gray-200 font-sans selection:bg-cyan-500/30 selection:text-cyan-100 overflow-x-hidden w-full">
-            <nav className="glass-premium sticky top-0 z-50 px-8 py-5 flex justify-between items-center border-b border-white/5 mx-4 mt-4 rounded-2xl">
-                <div className="flex items-center space-x-4 group cursor-pointer" onClick={() => navigate('/')}>
+            <nav className="glass-premium sticky top-0 z-50 px-4 sm:px-8 py-3 sm:py-5 flex justify-between items-center border-b border-white/5 mx-2 sm:mx-4 mt-2 sm:mt-4 rounded-xl sm:rounded-2xl">
+                <div className="flex items-center space-x-2 sm:space-x-4 group cursor-pointer" onClick={() => navigate('/')}>
                     <div className="relative">
                         <Shield className="text-cyan-400 w-8 h-8 group-hover:drop-shadow-[0_0_12px_rgba(0,240,255,0.8)] transition-all animate-pulse-slow" />
                         <div className="absolute inset-0 bg-cyan-500 opacity-20 blur-xl rounded-full"></div>
                     </div>
-                    <span className="text-2xl font-bold tracking-widest text-white font-orbitron transition-all">
+                    <span className="text-lg sm:text-2xl font-bold tracking-widest text-white font-orbitron transition-all truncate">
                         SHERK<span className="text-gradient-primary">ACADEMY</span>
                     </span>
                 </div>
@@ -48,9 +48,9 @@ export const Layout: React.FC = () => {
                     </div>
 
                     {user ? (
-                        <div className="flex items-center space-x-6 border-l border-white/10 pl-6">
-                            <span className="text-gray-300 flex items-center gap-2 font-mono text-xs border border-white/10 px-4 py-2 rounded-full bg-black/40 shadow-inner">
-                                <User size={14} className="text-purple-400" /> {user.username}
+                        <div className="flex items-center space-x-3 sm:space-x-6 border-l border-white/10 pl-3 sm:pl-6">
+                            <span className="text-gray-300 flex items-center gap-2 font-mono text-[10px] sm:text-xs border border-white/10 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full bg-black/40 shadow-inner max-w-[120px] sm:max-w-none">
+                                <User size={14} className="text-purple-400 shrink-0" /> <span className="truncate">{user.username}</span>
                             </span>
                             <button
                                 onClick={handleLogout}
@@ -69,7 +69,7 @@ export const Layout: React.FC = () => {
                     )}
                 </div>
             </nav>
-            <main className="p-8 max-w-[1400px] mx-auto mt-6 animate-float" style={{ animationDuration: '10s' }}>
+            <main className="p-4 sm:p-8 max-w-[1400px] mx-auto mt-4 sm:mt-6 animate-float" style={{ animationDuration: '10s' }}>
                 <Outlet />
             </main>
             <GlobalChatWidget />

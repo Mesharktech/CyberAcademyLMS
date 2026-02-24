@@ -74,13 +74,14 @@ export const Dashboard: React.FC = () => {
     return (
         <div className="space-y-10 animate-in fade-in duration-1000">
             {/* Header Section */}
-            <div className="relative rounded-3xl p-10 overflow-hidden glass-premium cyber-border">
+            <div className="relative rounded-2xl sm:rounded-3xl p-6 sm:p-10 overflow-hidden glass-premium cyber-border">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/3 animate-pulse-slow"></div>
                 <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/10 blur-[100px] rounded-full pointer-events-none translate-y-1/2 -translate-x-1/3 animate-pulse-slow"></div>
 
                 <div className="relative z-10">
-                    <h1 className="text-5xl font-bold text-white mb-4 font-sans tracking-tight">
-                        Welcome back, <span className="text-gradient-primary">{user?.username}</span>
+                    <h1 className="text-3xl sm:text-5xl font-bold text-white mb-4 font-sans tracking-tight break-words">
+                        Welcome back, <br className="block sm:hidden" />
+                        <span className="text-gradient-primary">{user?.username}</span>
                     </h1>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-6 mt-6">
                         <p className="text-gray-400 flex items-center gap-4 text-lg font-light">
