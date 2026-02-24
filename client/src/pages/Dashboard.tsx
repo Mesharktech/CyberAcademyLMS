@@ -35,7 +35,7 @@ export const Dashboard: React.FC = () => {
                     api.get('/users/dashboard-stats')
                 ]);
                 setCourses(coursesRes.data);
-                setStats(statsRes.data);
+                setStats(prev => ({ ...prev, ...statsRes.data }));
             } catch (err: unknown) {
                 console.error('Failed to load dashboard data', err);
             } finally {
