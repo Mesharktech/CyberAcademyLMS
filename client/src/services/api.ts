@@ -4,8 +4,8 @@ import { Capacitor } from '@capacitor/core';
 // Determine the base URL based on environment (Mobile, Production Vercel/Netlify, or Local Dev)
 // In production on Netlify, define VITE_API_URL in the dashboard pointing to your deployed Node.js backend
 const baseURL = Capacitor.isNativePlatform()
-    ? 'http://10.0.2.2:5000/api'
-    : import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    ? 'https://cyberacademylms.onrender.com/api'
+    : import.meta.env.VITE_API_URL || 'https://cyberacademylms.onrender.com/api';
 
 const api = axios.create({
     baseURL,
