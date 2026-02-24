@@ -30,12 +30,17 @@ export const Dashboard: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [coursesRes, statsRes] = await Promise.all([
-                    api.get('/courses/my-enrollments'),
-                    api.get('/users/dashboard-stats')
-                ]);
-                setCourses(coursesRes.data);
-                setStats(prev => ({ ...prev, ...statsRes.data }));
+                if (!user) {
+                    const res = await api.get('/courses');
+                    setCourses(res.data.slice(0, 3)); // show top 3 courses generically
+                } else {
+                    const [coursesRes, statsRes] = await Promise.all([
+                        api.get('/courses/my-enrollments'),
+                        api.get('/users/dashboard-stats')
+                    ]);
+                    setCourses(coursesRes.data);
+                    setStats(prev => ({ ...prev, ...statsRes.data }));
+                }
             } catch (err: unknown) {
                 console.error('Failed to load dashboard data', err);
             } finally {
@@ -55,6 +60,7 @@ export const Dashboard: React.FC = () => {
     };
 
     const getRankTitle = () => {
+        if (!user) return 'GUEST';
         if (user?.role === 'ADMIN') return 'SYSTEM ADMIN';
         return rankTitles[stats.rank] || 'TRAINEE';
     };
@@ -80,15 +86,21 @@ export const Dashboard: React.FC = () => {
 
                 <div className="relative z-10">
                     <h1 className="text-3xl sm:text-5xl font-bold text-white mb-4 font-sans tracking-tight break-words">
-                        Welcome back, <br className="block sm:hidden" />
-                        <span className="text-gradient-primary">{user?.username}</span>
+                        {user ? 'Welcome back,' : 'Welcome to'} <br className="block sm:hidden" />
+                        <span className="text-gradient-primary">{user ? user.username : 'CYBERNETICS ACADEMY'}</span>
                     </h1>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-6 mt-6">
                         <p className="text-gray-400 flex items-center gap-4 text-lg font-light">
                             Level: <span className={`font-mono tracking-widest font-bold ${user?.role === 'ADMIN' ? 'text-red-500' : 'text-cyan-400'}`}>{getRankTitle()}</span>
                         </p>
 
-                        {user?.role !== 'ADMIN' && (
+                        {!user && (
+                            <div className="flex-grow flex items-center text-sm text-cyan-400/80 tracking-widest font-mono p-3 bg-black/40 rounded-xl border border-white/5">
+                                [ GUEST ACCESS GRANTED — AUTHENTICATION REQUIRED FOR FULL CLEARANCE ]
+                            </div>
+                        )}
+
+                        {user && user.role !== 'ADMIN' && (
                             <div className="flex-grow max-w-md bg-black/40 p-3 rounded-xl border border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.5)_inset]">
                                 <div className="flex justify-between text-xs font-mono tracking-widest mb-2">
                                     <span className="text-purple-400">XP {currentXp}</span>
@@ -105,7 +117,7 @@ export const Dashboard: React.FC = () => {
 
                         <p className="text-gray-400 flex items-center gap-4 text-lg font-light sm:ml-auto">
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(0,240,255,0.8)] hidden sm:block"></span>
-                            Role: <span className="text-gray-300 uppercase tracking-widest text-xs border border-white/10 bg-white/5 px-3 py-1 rounded-full">{user?.role}</span>
+                            Role: <span className="text-gray-300 uppercase tracking-widest text-xs border border-white/10 bg-white/5 px-3 py-1 rounded-full">{user ? user.role : 'VISITOR'}</span>
                         </p>
                     </div>
                 </div>
@@ -129,9 +141,9 @@ export const Dashboard: React.FC = () => {
                                     <div key={i} className="h-32 glass-premium rounded-2xl animate-pulse"></div>
                                 ))}
                             </div>
-                        ) : courses.filter(c => (c.progress || 0) < 100).length > 0 ? (
+                        ) : courses.length > 0 ? (
                             <div className="space-y-6">
-                                {courses.filter(c => (c.progress || 0) < 100).map((course) => {
+                                {courses.filter(c => !user || (c.progress || 0) < 100).map((course) => {
                                     const progress = course.progress || 0;
                                     return (
                                         <div key={course.id} className="group relative glass-premium hover:border-cyan-500/50 p-8 rounded-2xl transition-all duration-500">
@@ -148,27 +160,30 @@ export const Dashboard: React.FC = () => {
                                                         <span>{course.modules?.length || 0} MODULES</span>
                                                     </div>
 
-                                                    {/* Progress Bar */}
-                                                    <div className="mt-5 h-2 w-full bg-black/50 rounded-full overflow-hidden border border-white/5">
-                                                        <div
-                                                            className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-1000 ease-out relative"
-                                                            style={{ width: `${progress}%` }}
-                                                        >
-                                                            <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+                                                    {user && (
+                                                        <div className="mt-5 h-2 w-full bg-black/50 rounded-full overflow-hidden border border-white/5">
+                                                            <div
+                                                                className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-1000 ease-out relative"
+                                                                style={{ width: `${progress}%` }}
+                                                            >
+                                                                <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div className="flex justify-between mt-2 font-mono tracking-widest">
-                                                        <span className="text-[10px] text-gray-500 uppercase">Synchronization</span>
-                                                        <span className="text-[10px] text-cyan-400">{progress}%</span>
-                                                    </div>
+                                                    )}
+                                                    {user && (
+                                                        <div className="flex justify-between mt-2 font-mono tracking-widest">
+                                                            <span className="text-[10px] text-gray-500 uppercase">Synchronization</span>
+                                                            <span className="text-[10px] text-cyan-400">{progress}%</span>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 <div className="mt-4 md:mt-0">
                                                     <Link
-                                                        to={`/courses/${course.slug}`}
+                                                        to={!user ? "/login" : `/courses/${course.slug}`}
                                                         className="premium-button block text-center"
                                                     >
-                                                        {course.progress && course.progress > 0 ? 'RESUME' : 'INITIATE'}
+                                                        {!user ? 'REGISTER TO INITIATE' : (course.progress && course.progress > 0 ? 'RESUME' : 'INITIATE')}
                                                     </Link>
                                                 </div>
                                             </div>
@@ -183,8 +198,8 @@ export const Dashboard: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Completed Operations */}
-                    {!loading && courses.filter(c => (c.progress || 0) === 100).length > 0 && (
+                    {/* Completed Operations - Only for active users */}
+                    {user && !loading && courses.filter(c => (c.progress || 0) === 100).length > 0 && (
                         <div className="space-y-8">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-semibold text-gray-400 flex items-center gap-3 font-orbitron tracking-wide">

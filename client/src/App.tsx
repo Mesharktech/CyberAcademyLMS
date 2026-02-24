@@ -30,12 +30,12 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+              <Route path="/" element={<Layout />}>
                 <Route index element={<Dashboard />} />
                 <Route path="courses" element={<Courses />} />
-                <Route path="courses/:slug" element={<CoursePlayer />} />
-                <Route path="labs" element={<Labs />} />
-                <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                <Route path="courses/:slug" element={<PrivateRoute><CoursePlayer /></PrivateRoute>} />
+                <Route path="labs" element={<PrivateRoute><Labs /></PrivateRoute>} />
+                <Route path="admin" element={<PrivateRoute><AdminRoute><AdminDashboard /></AdminRoute></PrivateRoute>} />
               </Route>
             </Routes>
           </Router>
