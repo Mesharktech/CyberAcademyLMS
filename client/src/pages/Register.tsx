@@ -11,17 +11,24 @@ export const Register: React.FC = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+        setSuccess('');
         try {
-            await api.post('/auth/register', { email, password, username, firstName, lastName });
-            // Auto login after register
-            const response = await api.post('/auth/login', { email, password });
-            login(response.data.token, response.data.user);
-            navigate('/');
+            const res = await api.post('/auth/register', { email, password, username, firstName, lastName });
+            if (res.data.requiresVerification) {
+                setSuccess(res.data.message);
+            } else {
+                // Fallback for legacy flow
+                const loginRes = await api.post('/auth/login', { email, password });
+                login(loginRes.data.token, loginRes.data.user);
+                navigate('/');
+            }
         } catch (err: unknown) {
             if (err && typeof err === 'object' && 'response' in err) {
                 const axiosError = err as { response?: { data?: { error?: string } } };
@@ -52,66 +59,77 @@ export const Register: React.FC = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                {success && (
+                    <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-4 rounded mb-6 text-sm font-mono text-center">
+                        {success}
+                        <div className="mt-4">
+                            <Link to="/login" className="premium-button inline-block text-xs py-2 px-4 shadow-lg shadow-hackon-green/20">PROCEED TO LOGIN</Link>
+                        </div>
+                    </div>
+                )}
+
+                {!success && (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">First Name</label>
+                                <input
+                                    type="text"
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Last Name</label>
+                                <input
+                                    type="text"
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
+                                    required
+                                />
+                            </div>
+                        </div>
                         <div>
-                            <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">First Name</label>
+                            <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Username</label>
                             <input
                                 type="text"
-                                value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Last Name</label>
+                            <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Email Address</label>
                             <input
-                                type="text"
-                                value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
                                 required
                             />
                         </div>
-                    </div>
-                    <div>
-                        <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Username</label>
-                        <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Email Address</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
-                            required
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="hackon-button w-full py-3 mt-4 rounded font-bold shadow-lg shadow-red-900/20"
-                    >
-                        SUBMIT APPLICATION
-                    </button>
-                </form>
+                        <div>
+                            <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Password</label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full bg-black/40 border border-white/10 rounded px-4 py-2 text-white focus:outline-none focus:border-hackon-green transition-colors text-sm"
+                                required
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="hackon-button w-full py-3 mt-4 rounded font-bold shadow-lg shadow-red-900/20"
+                        >
+                            SUBMIT APPLICATION
+                        </button>
+                    </form>
+                )}
 
                 <p className="text-center mt-6 text-gray-500 text-xs font-mono">
                     Already authenticated? <Link to="/login" className="text-hackon-green hover:text-white transition-colors">ACCESS TERMINAL</Link>

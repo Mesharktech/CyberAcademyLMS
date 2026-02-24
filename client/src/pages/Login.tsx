@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 
 export const Login: React.FC = () => {
@@ -10,6 +10,11 @@ export const Login: React.FC = () => {
     const [error, setError] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Check if user just verified their email
+    const queryParams = new URLSearchParams(location.search);
+    const isVerified = queryParams.get('verified') === 'true';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,6 +46,12 @@ export const Login: React.FC = () => {
                 {error && (
                     <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded mb-4 text-sm text-center">
                         {error}
+                    </div>
+                )}
+
+                {isVerified && !error && (
+                    <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-3 rounded mb-4 text-sm text-center">
+                        Identity verified successfully. You may now authenticate.
                     </div>
                 )}
 
