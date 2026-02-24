@@ -87,7 +87,7 @@ export const Dashboard: React.FC = () => {
                 <div className="relative z-10">
                     <h1 className="text-3xl sm:text-5xl font-bold text-white mb-4 font-sans tracking-tight break-words">
                         {user ? 'Welcome back,' : 'Welcome to'} <br className="block sm:hidden" />
-                        <span className="text-gradient-primary">{user ? user.username : 'CYBERNETICS ACADEMY'}</span>
+                        <span className="text-gradient-primary">{user ? user.username : 'SHERK ACADEMY'}</span>
                     </h1>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-6 mt-6">
                         <p className="text-gray-400 flex items-center gap-4 text-lg font-light">
