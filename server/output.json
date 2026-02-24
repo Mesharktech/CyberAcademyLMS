@@ -1,0 +1,12 @@
+[
+  {
+    "email": "admin@cyberacademy.com",
+    "username": "admin",
+    "isEmailVerified": false
+  },
+  {
+    "email": "mesharkmuindi69@gmail.com",
+    "username": "mesharkmuindi69",
+    "isEmailVerified": true
+  }
+]

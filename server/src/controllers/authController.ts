@@ -4,6 +4,7 @@ import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { sendVerificationEmail } from '../services/emailService';
+import * as admin from 'firebase-admin';
 
 const prisma = new PrismaClient();
 
@@ -39,8 +40,7 @@ export const register = async (req: Request, res: Response) => {
         // Hash password
         const passwordHash = await argon2.hash(password);
 
-        // Generate a secure verification token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
         // Create user (Default role: LEARNER, isEmailVerified: false)
         const newUser = await prisma.user.create({
@@ -51,12 +51,12 @@ export const register = async (req: Request, res: Response) => {
                 firstName,
                 lastName,
                 role: UserRole.LEARNER,
-                verificationToken
+                verificationCode
             }
         });
 
         // Dispatch verification email
-        await sendVerificationEmail(newUser.email, verificationToken);
+        await sendVerificationEmail(newUser.email, verificationCode);
 
         // Do not auto-login; mandate verification first.
         res.status(201).json({
@@ -80,8 +80,15 @@ export const login = async (req: Request, res: Response) => {
             return;
         }
 
-        // Find user
-        const user = await prisma.user.findUnique({ where: { email } });
+        // Find user by either email or username
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: email },
+                    { username: email }
+                ]
+            }
+        });
 
         if (!user) {
             res.status(401).json({ error: 'Invalid credentials' });
@@ -134,40 +141,156 @@ export const login = async (req: Request, res: Response) => {
     }
 };
 
-// Verify Email
+// Verify Email OTP Code
 export const verifyEmail = async (req: Request, res: Response) => {
     try {
-        const { token } = req.query;
+        const { email, code } = req.body;
 
-        if (!token || typeof token !== 'string') {
-            res.status(400).json({ error: 'Invalid verification token' });
+        if (!email || !code || typeof code !== 'string') {
+            res.status(400).json({ error: 'Email and verification code are required' });
             return;
         }
 
         const user = await prisma.user.findFirst({
-            where: { verificationToken: token }
+            where: { email, verificationCode: code }
         });
 
         if (!user) {
-            res.status(400).json({ error: 'Invalid or expired verification token' });
+            res.status(400).json({ error: 'Invalid or expired verification code' });
             return;
         }
 
         // Update user state
-        await prisma.user.update({
+        const updatedUser = await prisma.user.update({
             where: { id: user.id },
             data: {
                 isEmailVerified: true,
-                verificationToken: null // Burn the token
+                verificationCode: null // Burn the code
             }
         });
 
-        // Redirect user to the frontend login page with a success message
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        res.redirect(`${frontendUrl}/login?verified=true`);
+        // Generate Token and automatically log them in
+        const token = jwt.sign(
+            { userId: updatedUser.id, role: updatedUser.role },
+            process.env.JWT_SECRET || 'secret',
+            { expiresIn: '1d' }
+        );
+
+        res.json({
+            message: 'Identity verified successfully',
+            user: {
+                id: updatedUser.id,
+                email: updatedUser.email,
+                username: updatedUser.username,
+                role: updatedUser.role,
+                xp: updatedUser.xp,
+                rank: updatedUser.rank
+            },
+            token
+        });
 
     } catch (error) {
         console.error('Email Verification Error:', error);
         res.status(500).json({ error: 'Internal server error during verification' });
+    }
+};
+
+// Initialize Firebase Admin (will fail gracefully if credentials aren't set yet)
+try {
+    if (process.env.FIREBASE_PROJECT_ID) {
+        admin.initializeApp({
+            credential: admin.credential.cert({
+                projectId: process.env.FIREBASE_PROJECT_ID,
+                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            }),
+        });
+    }
+} catch (error) {
+    console.error('Firebase Admin Initialization Error:', error);
+}
+
+// Google Login
+export const googleLogin = async (req: Request, res: Response) => {
+    try {
+        const { idToken } = req.body;
+
+        if (!idToken) {
+            res.status(400).json({ error: 'Google ID token is required' });
+            return;
+        }
+
+        if (!admin.apps.length) {
+            res.status(500).json({ error: 'Firebase Admin is not configured on the server. Please add credentials.' });
+            return;
+        }
+
+        // Verify the token with Firebase
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const { email, name, uid } = decodedToken;
+
+        if (!email) {
+            res.status(400).json({ error: 'No email found in Google payload' });
+            return;
+        }
+
+        // Find or create user
+        let user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user) {
+            // Create user automatically (they are inherently verified by Google)
+            const firstName = name ? name.split(' ')[0] : 'Operative';
+            const lastName = name ? name.split(' ').slice(1).join(' ') : 'Unknown';
+
+            // Generate a friendlier username from email
+            let baseUsername = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            if (!baseUsername) baseUsername = 'user';
+
+            let username = baseUsername;
+            let counter = 1;
+            while (await prisma.user.findUnique({ where: { username } })) {
+                username = `${baseUsername}${counter}`;
+                counter++;
+            }
+
+            // We need a dummy password hash just to satisfy the schema (Google handles real auth)
+            const passwordHash = await argon2.hash(uid + process.env.JWT_SECRET);
+
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    username,
+                    firstName,
+                    lastName,
+                    passwordHash,
+                    role: UserRole.LEARNER,
+                    isEmailVerified: true // Trust Google
+                }
+            });
+        }
+
+        // Generate our JWT
+        const token = jwt.sign(
+            { userId: user.id, role: user.role },
+            process.env.JWT_SECRET || 'secret',
+            { expiresIn: '1d' }
+        );
+
+        res.json({
+            message: 'Google login successful',
+            user: {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                xp: user.xp,
+                rank: user.rank
+            },
+            token
+        });
+
+    } catch (error) {
+        console.error('Google Login Error:', error);
+        res.status(500).json({ error: 'Google authentication failed' });
     }
 };
