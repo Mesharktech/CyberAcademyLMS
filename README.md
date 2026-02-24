@@ -78,21 +78,6 @@ A comprehensive Learning Management System built for cybersecurity training.
 3.  The backend API will typically run on `http://localhost:5000`.
 4.  The frontend application will be accessible at the URL provided by Vite (e.g., `http://localhost:5173`).
 
-## Deployment
-
-### Backend (Render)
-
-1.  Create a Web Service on Render connected to this repository.
-2.  Set the **Build Command**: `npm install --include=dev && npx prisma generate && npm run build`
-3.  Set the **Start Command**: `npm start`
-4.  Configure necessary environment variables in the Render dashboard.
-
-### Frontend (Netlify/Vercel)
-
-1.  Connect your repository to Netlify or Vercel.
-2.  Set the **Build Command**: `npm run build`
-3.  Set the **Publish Directory**: `dist`
-4.  Ensure redirects are configured for Single Page Applications (e.g., `_redirects` file for Netlify).
 
 ## License
 
