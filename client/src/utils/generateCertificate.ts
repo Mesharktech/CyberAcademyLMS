@@ -1,4 +1,7 @@
 import jsPDF from 'jspdf';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 interface CertificateData {
     userName: string;
@@ -7,7 +10,7 @@ interface CertificateData {
     instructorName?: string;
 }
 
-export const generateCertificate = ({
+export const generateCertificate = async ({
     userName,
     courseName,
     completionDate,
@@ -125,6 +128,34 @@ export const generateCertificate = ({
     // Check if jspdf supports charSpace, if not catch and ignore (some older types do not)
 
     // Download PDF
-    const safeFilename = `Sherk_Academy_Certificate_${courseName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
-    doc.save(safeFilename);
+    const safeFilename = `Sherk_Academy_Certificate_${courseName.replace(/[^a-z0-9]/gi, '_').substring(0, 30).toLowerCase()}.pdf`;
+
+    if (Capacitor.isNativePlatform()) {
+        try {
+            // Get base64 string from jsPDF
+            const base64Data = doc.output('datauristring').split(',')[1];
+
+            // Save to device filesystem
+            const savedFile = await Filesystem.writeFile({
+                path: safeFilename,
+                data: base64Data,
+                directory: Directory.Documents
+            });
+
+            // Trigger native share sheet / open file
+            await Share.share({
+                title: 'Sherk Academy Certificate',
+                text: 'My Certificate of Completion',
+                url: savedFile.uri,
+                dialogTitle: 'Save or Share Certificate'
+            });
+
+        } catch (error) {
+            console.error("Error saving certificate natively:", error);
+            alert("Failed to save certificate. Make sure you have granted storage permissions.");
+        }
+    } else {
+        // Standard Web Browser download
+        doc.save(safeFilename);
+    }
 };
