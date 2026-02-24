@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, LogOut, User, Terminal, Settings, Menu, X } from 'lucide-react';
+import { LogOut, User, Terminal, Settings, Menu, X } from 'lucide-react';
 import { GlobalChatWidget } from './GlobalChatWidget';
 
 export const Layout: React.FC = () => {
@@ -21,13 +21,7 @@ export const Layout: React.FC = () => {
         <div className="min-h-screen text-gray-200 font-sans selection:bg-cyan-500/30 selection:text-cyan-100 overflow-x-hidden w-full">
             <nav className="glass-premium sticky top-0 z-50 px-4 sm:px-8 py-3 sm:py-5 flex justify-between items-center border-b border-white/5 mx-2 sm:mx-4 mt-2 sm:mt-4 rounded-xl sm:rounded-2xl">
                 <div className="flex items-center space-x-2 sm:space-x-4 group cursor-pointer" onClick={() => navigate('/')}>
-                    <div className="relative">
-                        <Shield className="text-cyan-400 w-8 h-8 group-hover:drop-shadow-[0_0_12px_rgba(0,240,255,0.8)] transition-all animate-pulse-slow" />
-                        <div className="absolute inset-0 bg-cyan-500 opacity-20 blur-xl rounded-full"></div>
-                    </div>
-                    <span className="text-lg sm:text-2xl font-bold tracking-widest text-white font-orbitron transition-all truncate">
-                        SHERK<span className="text-gradient-primary">ACADEMY</span>
-                    </span>
+                    <img src="/logo.png" alt="Sherk Academy" className="h-12 sm:h-16 object-contain group-hover:drop-shadow-[0_0_15px_rgba(0,240,255,0.6)] transition-all duration-300" />
                 </div>
 
                 <div className="flex items-center space-x-2 sm:space-x-8">
