@@ -64,69 +64,113 @@ export const Dashboard: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 {/* Main Content: Learning Path */}
-                <div className="lg:col-span-2 space-y-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-semibold text-white flex items-center gap-3 font-orbitron tracking-wide">
-                            <Terminal size={24} className="text-cyan-400" /> Active Operations
-                        </h2>
+                <div className="lg:col-span-2 space-y-12">
+
+                    {/* Active Operations */}
+                    <div className="space-y-8">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-semibold text-white flex items-center gap-3 font-orbitron tracking-wide">
+                                <Terminal size={24} className="text-cyan-400" /> Active Operations
+                            </h2>
+                        </div>
+
+                        {loading ? (
+                            <div className="space-y-6">
+                                {[1, 2].map(i => (
+                                    <div key={i} className="h-32 glass-premium rounded-2xl animate-pulse"></div>
+                                ))}
+                            </div>
+                        ) : courses.filter(c => (c.progress || 0) < 100).length > 0 ? (
+                            <div className="space-y-6">
+                                {courses.filter(c => (c.progress || 0) < 100).map((course) => {
+                                    const progress = course.progress || 0;
+                                    return (
+                                        <div key={course.id} className="group relative glass-premium hover:border-cyan-500/50 p-8 rounded-2xl transition-all duration-500">
+                                            <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                                                <div className="p-5 rounded-2xl bg-black/60 border border-white/5 group-hover:border-cyan-500/50 transition-all duration-500 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_20px_rgba(0,240,255,0.2)]">
+                                                    <ShieldCheck size={32} className={`transition-all duration-500 ${progress > 0 ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.5)]' : 'text-gray-600'}`} />
+                                                </div>
+
+                                                <div className="flex-grow text-center md:text-left">
+                                                    <h3 className="text-xl font-bold text-gray-200 mb-2 group-hover:text-white transition-colors">{course.title}</h3>
+                                                    <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-gray-500 font-mono tracking-widest">
+                                                        <span className="text-purple-400/80">{course.difficulty}</span>
+                                                        <span>•</span>
+                                                        <span>{course.modules?.length || 0} MODULES</span>
+                                                    </div>
+
+                                                    {/* Progress Bar */}
+                                                    <div className="mt-5 h-2 w-full bg-black/50 rounded-full overflow-hidden border border-white/5">
+                                                        <div
+                                                            className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-1000 ease-out relative"
+                                                            style={{ width: `${progress}%` }}
+                                                        >
+                                                            <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex justify-between mt-2 font-mono tracking-widest">
+                                                        <span className="text-[10px] text-gray-500 uppercase">Synchronization</span>
+                                                        <span className="text-[10px] text-cyan-400">{progress}%</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4 md:mt-0">
+                                                    <Link
+                                                        to={`/courses/${course.slug}`}
+                                                        className="premium-button block text-center"
+                                                    >
+                                                        {course.progress && course.progress > 0 ? 'RESUME' : 'INITIATE'}
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="p-12 text-center text-gray-500 glass-premium rounded-2xl border-dashed border-white/10 font-mono tracking-widest">
+                                [ NO ACTIVE MISSIONS ASSIGNED ]
+                            </div>
+                        )}
                     </div>
 
-                    {loading ? (
-                        <div className="space-y-6">
-                            {[1, 2].map(i => (
-                                <div key={i} className="h-32 glass-premium rounded-2xl animate-pulse"></div>
-                            ))}
-                        </div>
-                    ) : courses.length > 0 ? (
-                        <div className="space-y-6">
-                            {courses.slice(0, 3).map((course) => {
-                                const progress = course.progress || 0;
-                                return (
-                                    <div key={course.id} className="group relative glass-premium hover:border-cyan-500/50 p-8 rounded-2xl transition-all duration-500">
-                                        <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                                            <div className="p-5 rounded-2xl bg-black/60 border border-white/5 group-hover:border-cyan-500/50 transition-all duration-500 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_20px_rgba(0,240,255,0.2)]">
-                                                <ShieldCheck size={32} className={`transition-all duration-500 ${progress > 0 ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.5)]' : 'text-gray-600'}`} />
+                    {/* Completed Operations */}
+                    {!loading && courses.filter(c => (c.progress || 0) === 100).length > 0 && (
+                        <div className="space-y-8">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold text-gray-400 flex items-center gap-3 font-orbitron tracking-wide">
+                                    <ShieldCheck size={20} className="text-green-500" /> Completed Operations
+                                </h2>
+                            </div>
+                            <div className="space-y-4">
+                                {courses.filter(c => (c.progress || 0) === 100).map((course) => (
+                                    <div key={course.id} className="group relative glass-premium opacity-70 hover:opacity-100 p-6 rounded-2xl transition-all duration-300">
+                                        <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
+                                            <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20">
+                                                <ShieldCheck size={24} className="text-green-500" />
                                             </div>
 
                                             <div className="flex-grow text-center md:text-left">
-                                                <h3 className="text-xl font-bold text-gray-200 mb-2 group-hover:text-white transition-colors">{course.title}</h3>
-                                                <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-gray-500 font-mono tracking-widest">
-                                                    <span className="text-purple-400/80">{course.difficulty}</span>
+                                                <h3 className="text-lg font-bold text-gray-300 mb-1 group-hover:text-white transition-colors">{course.title}</h3>
+                                                <div className="flex justify-center md:justify-start gap-4 text-xs text-green-500/70 font-mono tracking-widest">
+                                                    <span>100% SYNCHRONIZED</span>
                                                     <span>•</span>
                                                     <span>{course.modules?.length || 0} MODULES</span>
-                                                </div>
-
-                                                {/* Progress Bar */}
-                                                <div className="mt-5 h-2 w-full bg-black/50 rounded-full overflow-hidden border border-white/5">
-                                                    <div
-                                                        className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-1000 ease-out relative"
-                                                        style={{ width: `${progress}%` }}
-                                                    >
-                                                        <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex justify-between mt-2 font-mono tracking-widest">
-                                                    <span className="text-[10px] text-gray-500 uppercase">Synchronization</span>
-                                                    <span className="text-[10px] text-cyan-400">{progress}%</span>
                                                 </div>
                                             </div>
 
                                             <div className="mt-4 md:mt-0">
                                                 <Link
                                                     to={`/courses/${course.slug}`}
-                                                    className="premium-button block text-center"
+                                                    className="px-6 py-2.5 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 font-bold tracking-widest text-xs transition-all uppercase block text-center shadow-none"
                                                 >
-                                                    {course.progress && course.progress > 0 ? 'RESUME' : 'INITIATE'}
+                                                    REVIEW
                                                 </Link>
                                             </div>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <div className="p-12 text-center text-gray-500 glass-premium rounded-2xl border-dashed border-white/10 font-mono tracking-widest">
-                            [ NO ACTIVE MISSIONS ASSIGNED ]
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
