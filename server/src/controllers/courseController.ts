@@ -94,7 +94,7 @@ export const getCourses = async (req: Request, res: Response) => {
             return {
                 ...course,
                 progress,
-                enrolled: enrolledCourseIds.has(course.id) || Number(course.price) === 0,
+                enrolled: enrolledCourseIds.has(course.id),
                 completedModules,
                 totalModules: course.modules.length
             };
