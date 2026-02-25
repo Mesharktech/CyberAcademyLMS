@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { BookOpen, Terminal, Cpu, Lock } from 'lucide-react';
+import { BookOpen, Terminal, Lock } from 'lucide-react';
 
 interface Course {
     id: string;
