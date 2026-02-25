@@ -77,8 +77,23 @@ export const Courses: React.FC = () => {
                                     ${isLocked ? 'opacity-50 cursor-not-allowed grayscale-[50%]' : 'hover:border-cyan-500/50 hover:shadow-[0_10px_40px_rgba(0,240,255,0.15)] hover:-translate-y-2'}`}
                                 onClick={(e) => isLocked && e.preventDefault()}
                             >
-                                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 group-hover:text-purple-400 transition-all duration-500 transform group-hover:scale-110">
-                                    {isLocked ? <Lock size={120} /> : <Cpu size={120} />}
+                                <div className="absolute top-0 right-0 p-4 transform transition-all duration-500 group-hover:scale-105">
+                                    {isLocked ? (
+                                        <Lock size={120} className="opacity-5 text-gray-500" />
+                                    ) : course.enrolled ? (
+                                        <div className="bg-green-500/20 text-green-400 border border-green-500/30 px-3 py-1.5 rounded-xl text-xs font-bold tracking-widest backdrop-blur-md shadow-[0_0_15px_rgba(0,255,100,0.15)] flex items-center gap-1.5">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
+                                            ENROLLED
+                                        </div>
+                                    ) : (
+                                        <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-1.5">
+                                            {course.price > 0 ? (
+                                                <span className="text-cyan-400 font-bold font-orbitron text-sm">${course.price}</span>
+                                            ) : (
+                                                <span className="text-purple-400 font-bold tracking-widest text-xs uppercase">FREE</span>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="mb-6 relative z-10 flex gap-2">
