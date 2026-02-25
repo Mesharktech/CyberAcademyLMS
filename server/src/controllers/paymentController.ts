@@ -28,12 +28,8 @@ export const checkEnrollment = async (req: AuthRequest, res: Response) => {
             return;
         }
 
-        // Free courses are always accessible
-        const course = await prisma.course.findUnique({ where: { id: courseId } });
-        if (course && Number(course.price) === 0) {
-            res.json({ enrolled: true, method: 'FREE' });
-            return;
-        }
+        // We deliberately do not check if course.price === 0 here, because we want the frontend
+        // to realize it is missing an enrollment record so it can hit /enroll-free to create one.
 
         res.json({
             enrolled: !!enrollment && enrollment.status === 'COMPLETED',
