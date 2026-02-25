@@ -75,7 +75,7 @@ export const Register: React.FC = () => {
             login(response.data.token, response.data.user);
 
             setSuccess(`Welcome, ${response.data.user.username}! Redirecting...`);
-            setTimeout(() => navigate('/'), 1500);
+            setTimeout(() => navigate('/'), 400);
         } catch (err: any) {
             console.error("=============== FIREBASE SSO ERROR ===============");
             console.error("Raw Error Object:", err);
@@ -207,8 +207,8 @@ export const Register: React.FC = () => {
                             type="submit"
                             disabled={isLoading}
                             className={`w-full text-white font-bold py-2 px-4 rounded transition-all transform mt-4 ${isLoading
-                                    ? 'bg-gray-600 cursor-not-allowed opacity-70 animate-pulse'
-                                    : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 active:scale-95'
+                                ? 'bg-gray-600 cursor-not-allowed opacity-70 animate-pulse'
+                                : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 active:scale-95'
                                 }`}
                         >
                             {isLoading ? 'Transmitting Data...' : 'Submit Application'}

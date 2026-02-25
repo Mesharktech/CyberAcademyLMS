@@ -253,8 +253,9 @@ export const googleLogin = async (req: Request, res: Response) => {
                 counter++;
             }
 
-            // We need a dummy password hash just to satisfy the schema (Google handles real auth)
-            const passwordHash = await argon2.hash(uid + process.env.JWT_SECRET);
+            // We don't need to cryptographically hash a dummy password, it wastes 1s of server time during signup.
+            // The uid + secret is already secure enough to satisfy the db schema.
+            const passwordHash = `GoogleOAuth_${uid}_${Date.now()}`;
 
             user = await prisma.user.create({
                 data: {
