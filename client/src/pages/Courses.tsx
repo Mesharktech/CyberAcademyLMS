@@ -87,8 +87,8 @@ export const Courses: React.FC = () => {
                                         </div>
                                     ) : (
                                         <div className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl shadow-lg flex items-center gap-1.5">
-                                            {course.price > 0 ? (
-                                                <span className="text-cyan-400 font-bold font-orbitron text-sm">${course.price}</span>
+                                            {Number(course.price) > 0 ? (
+                                                <span className="text-cyan-400 font-bold font-orbitron text-sm">${Number(course.price).toFixed(2)}</span>
                                             ) : (
                                                 <span className="text-purple-400 font-bold tracking-widest text-xs uppercase">FREE</span>
                                             )}
