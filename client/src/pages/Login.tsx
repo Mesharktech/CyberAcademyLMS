@@ -10,6 +10,8 @@ export const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -20,10 +22,14 @@ export const Login: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+        setSuccess('');
+        setIsLoading(true);
         try {
             const response = await api.post('/auth/login', { email, password });
             login(response.data.token, response.data.user);
-            navigate('/');
+            setSuccess(`Welcome back, ${response.data.user.username}! Redirecting...`);
+            setTimeout(() => navigate('/'), 1500);
         } catch (err: unknown) {
             if (err && typeof err === 'object' && 'response' in err) {
                 const axiosError = err as { response?: { data?: { error?: string } } };
@@ -31,18 +37,23 @@ export const Login: React.FC = () => {
             } else {
                 setError('Login failed');
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleGoogleLogin = async () => {
         try {
             setError('');
+            setSuccess('');
             const result = await signInWithPopup(auth, googleProvider);
             const idToken = await result.user.getIdToken();
 
             const response = await api.post('/auth/google', { idToken });
             login(response.data.token, response.data.user);
-            navigate('/');
+
+            setSuccess(`Welcome, ${response.data.user.username}! Redirecting...`);
+            setTimeout(() => navigate('/'), 1500);
         } catch (err: any) {
             console.error("=============== FIREBASE SSO ERROR ===============");
             console.error("Raw Error Object:", err);
@@ -77,7 +88,13 @@ export const Login: React.FC = () => {
                     </div>
                 )}
 
-                {isVerified && !error && (
+                {success && (
+                    <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-3 rounded mb-4 text-sm text-center">
+                        {success}
+                    </div>
+                )}
+
+                {isVerified && !error && !success && (
                     <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-3 rounded mb-4 text-sm text-center">
                         Identity verified successfully. You may now authenticate.
                     </div>
@@ -106,9 +123,13 @@ export const Login: React.FC = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2 px-4 rounded transition-all transform active:scale-95"
+                        disabled={isLoading}
+                        className={`w-full text-white font-bold py-2 px-4 rounded transition-all transform ${isLoading
+                                ? 'bg-gray-600 cursor-not-allowed opacity-70 animate-pulse'
+                                : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 active:scale-95'
+                            }`}
                     >
-                        Authenticate
+                        {isLoading ? 'Authenticating...' : 'Authenticate'}
                     </button>
 
                     <div className="relative my-6">

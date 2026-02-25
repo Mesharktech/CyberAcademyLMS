@@ -16,6 +16,7 @@ export const Register: React.FC = () => {
     const [success, setSuccess] = useState('');
     const [showOTP, setShowOTP] = useState(false);
     const [otpCode, setOtpCode] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -23,6 +24,7 @@ export const Register: React.FC = () => {
         e.preventDefault();
         setError('');
         setSuccess('');
+        setIsLoading(true);
         try {
             const res = await api.post('/auth/register', { email, password, username, firstName, lastName });
             if (res.data.requiresVerification) {
@@ -41,6 +43,8 @@ export const Register: React.FC = () => {
             } else {
                 setError('Registration failed');
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -69,7 +73,9 @@ export const Register: React.FC = () => {
 
             const response = await api.post('/auth/google', { idToken });
             login(response.data.token, response.data.user);
-            navigate('/');
+
+            setSuccess(`Welcome, ${response.data.user.username}! Redirecting...`);
+            setTimeout(() => navigate('/'), 1500);
         } catch (err: any) {
             console.error("=============== FIREBASE SSO ERROR ===============");
             console.error("Raw Error Object:", err);
@@ -199,9 +205,13 @@ export const Register: React.FC = () => {
                         </div>
                         <button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-2 px-4 rounded transition-all transform active:scale-95 mt-4"
+                            disabled={isLoading}
+                            className={`w-full text-white font-bold py-2 px-4 rounded transition-all transform mt-4 ${isLoading
+                                    ? 'bg-gray-600 cursor-not-allowed opacity-70 animate-pulse'
+                                    : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 active:scale-95'
+                                }`}
                         >
-                            Submit Application
+                            {isLoading ? 'Transmitting Data...' : 'Submit Application'}
                         </button>
 
                         <div className="relative my-6">
