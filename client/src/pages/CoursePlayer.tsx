@@ -87,25 +87,32 @@ export const CoursePlayer: React.FC = () => {
         fetchCourse();
     }, [slug, navigate]);
 
-    // Check enrollment for paid courses, and then release the loading lock
+    // Check enrollment, automatically enroll if free, and then release the loading lock
     useEffect(() => {
         if (!course) return;
         const price = Number(course.price || 0);
 
-        if (price === 0) {
-            setEnrolled(true);
-            setLoading(false); // Free course, we can stop loading immediately
-            return;
-        }
-
         const checkEnrollment = async () => {
             try {
                 const res = await api.get(`/payments/check/${course.id}`);
-                setEnrolled(res.data.enrolled);
-                if (!res.data.enrolled) setShowPayment(true);
+
+                if (res.data.enrolled) {
+                    setEnrolled(true);
+                } else if (price === 0) {
+                    // Not officially enrolled in the DB yet, but it's free, so auto-enroll them now!
+                    await api.post('/payments/enroll-free', { courseId: course.id });
+                    setEnrolled(true);
+                } else {
+                    // Paid course, not enrolled
+                    setShowPayment(true);
+                }
             } catch {
-                setEnrolled(false);
-                setShowPayment(true);
+                if (price === 0) {
+                    setEnrolled(true); // Fallback: let them view it anyway if the API blips
+                } else {
+                    setEnrolled(false);
+                    setShowPayment(true);
+                }
             } finally {
                 setLoading(false); // Enrollment strictly checked, safe to render UI now
             }
