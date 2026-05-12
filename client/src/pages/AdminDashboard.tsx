@@ -759,6 +759,8 @@ const AIGeneratorTab: React.FC<{ courses: Course[] }> = ({ courses }) => {
     const [saveCourseId, setSaveCourseId] = useState('');
     const [saving, setSaving] = useState(false);
     const [savedOk, setSavedOk] = useState(false);
+    const [newCourseTitle, setNewCourseTitle] = useState('');
+    const [newCourseSlug, setNewCourseSlug] = useState('');
     const fileRef = useRef<HTMLInputElement>(null);
 
     // ── Live Challenge Generator state ──
@@ -819,9 +821,20 @@ const AIGeneratorTab: React.FC<{ courses: Course[] }> = ({ courses }) => {
     };
 
     const saveModule = async () => {
-        if (!result || !saveCourseId) return;
+        if (!result) return;
         setSaving(true);
-        try { await api.post('/ai/save-module', { courseId:saveCourseId, title:result.generated.title, content:result.generated.content, xpReward:100, requiredRank:1 }); setSaveModal(false); setSavedOk(true); }
+        try {
+            let targetCourseId = saveCourseId;
+            if (saveCourseId === '__new__') {
+                if (!newCourseTitle.trim()) { setErr('Enter a course title'); setSaving(false); return; }
+                const slug = newCourseSlug.trim() || newCourseTitle.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                const courseRes = await api.post('/courses', { title: newCourseTitle.trim(), slug, description: '', price: 0 });
+                targetCourseId = courseRes.data.id;
+            }
+            if (!targetCourseId) { setErr('Select or create a course'); setSaving(false); return; }
+            await api.post('/ai/save-module', { courseId: targetCourseId, title: result.generated.title, content: result.generated.content, xpReward: 100, requiredRank: 1 });
+            setSaveModal(false); setSavedOk(true);
+        }
         catch (e: any) { setErr(e.response?.data?.error || 'Failed to save'); }
         finally { setSaving(false); }
     };
@@ -974,9 +987,24 @@ const AIGeneratorTab: React.FC<{ courses: Course[] }> = ({ courses }) => {
                 <Modal title="Save to Course" onClose={() => setSaveModal(false)}>
                     <div className="space-y-4">
                         <p className="text-sm text-gray-400">Add <span className="text-white font-semibold">"{result.generated.title}"</span> to:</p>
-                        <div><label className="block text-sm text-gray-400 mb-1">Course</label><select value={saveCourseId} onChange={e => setSaveCourseId(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50">{courses.map(c => <option key={c.id} value={c.id} className="bg-[#0d0d1a]">{c.title} ({c.modules.length} modules)</option>)}</select></div>
-                        {courses.length === 0 && <p className="text-amber-400 text-sm">Create a course first in the Overview tab.</p>}
-                        <button onClick={saveModule} disabled={saving || !saveCourseId} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-600 disabled:opacity-50 py-3 rounded-xl font-semibold"><Save size={15} /> {saving ? 'Saving...' : 'Save Module'}</button>
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-1">Course</label>
+                            <select value={saveCourseId} onChange={e => { setSaveCourseId(e.target.value); setNewCourseTitle(''); setNewCourseSlug(''); }} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50">
+                                <option value="" className="bg-[#0d0d1a]">— Select a course —</option>
+                                <option value="__new__" className="bg-[#0d0d1a] text-cyan-400">＋ Create new course</option>
+                                {courses.map(c => <option key={c.id} value={c.id} className="bg-[#0d0d1a]">{c.title} ({c.modules.length} modules)</option>)}
+                            </select>
+                        </div>
+                        {saveCourseId === '__new__' && (
+                            <div className="space-y-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                                <p className="text-xs text-cyan-400 font-semibold uppercase tracking-wider">New Course</p>
+                                <Field label="Course Title *" value={newCourseTitle} onChange={v => { setNewCourseTitle(v); setNewCourseSlug(v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')); }} placeholder="e.g. Penetration Testing Fundamentals" />
+                                <Field label="Slug" value={newCourseSlug} onChange={setNewCourseSlug} placeholder="auto-generated from title" />
+                            </div>
+                        )}
+                        <button onClick={saveModule} disabled={saving || !saveCourseId || (saveCourseId === '__new__' && !newCourseTitle.trim())} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-600 disabled:opacity-50 py-3 rounded-xl font-semibold">
+                            <Save size={15} /> {saving ? 'Saving...' : saveCourseId === '__new__' ? 'Create Course & Save Module' : 'Save Module'}
+                        </button>
                     </div>
                 </Modal>
             )}
