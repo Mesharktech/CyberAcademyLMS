@@ -49,7 +49,7 @@ export const submitFlag = async (req: AuthRequest, res: Response) => {
         if (!userId) { res.status(401).json({ error: 'Unauthorized' }); return; }
 
         const { id } = req.params as { id: string };
-        const { flag } = req.body;
+        const { flag, hintUsed } = req.body;
         if (!flag) { res.status(400).json({ error: 'Flag is required' }); return; }
 
         const challenge = await prisma.challenge.findUnique({ where: { id, isActive: true } });
@@ -70,12 +70,15 @@ export const submitFlag = async (req: AuthRequest, res: Response) => {
             return;
         }
 
+        // Apply hint penalty: -10% XP if hint was revealed
+        const awardedPoints = hintUsed ? Math.floor(challenge.points * 0.9) : challenge.points;
+
         // Record solve + award XP in a transaction
         await prisma.$transaction(async (tx: any) => {
             await tx.challengeSolve.create({ data: { userId, challengeId: id } });
             await tx.challenge.update({ where: { id }, data: { solveCount: { increment: 1 } } });
             const user = await tx.user.findUnique({ where: { id: userId } });
-            const newXp = (user.xp || 0) + challenge.points;
+            const newXp = (user.xp || 0) + awardedPoints;
             let newRank = user.rank;
             if (newXp >= 1000 && newRank < 2) newRank = 2;
             if (newXp >= 5000 && newRank < 3) newRank = 3;
@@ -84,7 +87,8 @@ export const submitFlag = async (req: AuthRequest, res: Response) => {
             await tx.user.update({ where: { id: userId }, data: { xp: newXp, rank: newRank } });
         });
 
-        res.json({ correct: true, alreadySolved: false, points: challenge.points, message: `+${challenge.points} XP. Flag captured.` });
+        const hintNote = hintUsed ? ' (−10% hint penalty)' : '';
+        res.json({ correct: true, alreadySolved: false, points: awardedPoints, message: `+${awardedPoints} XP. Flag captured.${hintNote}` });
     } catch (error) {
         console.error('Submit Flag Error:', error);
         res.status(500).json({ error: 'Failed to submit flag' });

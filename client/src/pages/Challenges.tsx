@@ -77,7 +77,7 @@ const ChallengeCard: React.FC<{ challenge: Challenge; onSolve: (id: string) => v
         setSubmitting(true);
         setResult(null);
         try {
-            const res = await api.post(`/challenges/${challenge.id}/submit`, { flag: flag.trim() });
+            const res = await api.post(`/challenges/${challenge.id}/submit`, { flag: flag.trim(), hintUsed: showHint });
             setResult({ correct: res.data.correct, message: res.data.message });
             if (res.data.correct && !res.data.alreadySolved) {
                 setTimeout(() => onSolve(challenge.id), 800);
