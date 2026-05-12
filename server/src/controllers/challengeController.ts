@@ -64,10 +64,23 @@ export const submitFlag = async (req: AuthRequest, res: Response) => {
             return;
         }
 
-        const submitted = hashFlag(flag);
-        if (submitted !== challenge.flagHash) {
-            res.json({ correct: false, message: 'Wrong flag. Keep trying.' });
-            return;
+        // Live challenges: compare against the user's unique instance flag, not the generic challenge hash
+        if ((challenge as any).isLive) {
+            const instance = await (prisma as any).challengeInstance.findFirst({
+                where: { userId, challengeId: id, status: { in: ['RUNNING', 'STARTING', 'STOPPED', 'EXPIRED'] } },
+                orderBy: { createdAt: 'desc' }
+            });
+            const correctFlag = instance?.uniqueFlag;
+            if (!correctFlag || flag.trim() !== correctFlag) {
+                res.json({ correct: false, message: 'Wrong flag. Keep hacking.' });
+                return;
+            }
+        } else {
+            const submitted = hashFlag(flag);
+            if (submitted !== challenge.flagHash) {
+                res.json({ correct: false, message: 'Wrong flag. Keep trying.' });
+                return;
+            }
         }
 
         // Apply hint penalty: -10% XP if hint was revealed
