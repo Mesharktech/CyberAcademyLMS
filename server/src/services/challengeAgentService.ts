@@ -46,34 +46,48 @@ async function callGroq(system: string, user: string): Promise<string> {
 export async function runDesignerAgent(topic: string, difficulty: string, category: string): Promise<ChallengeDesign> {
     const pointsMap: Record<string, number> = { EASY: 50, MEDIUM: 150, HARD: 300, INSANE: 500 };
 
+    // Force live-deployable categories only — OSINT/FORENSICS require real external targets
+    const safeCategory = ['OSINT', 'FORENSICS', 'MISC'].includes(category.toUpperCase())
+        ? 'WEB'
+        : category.toUpperCase();
+
     const raw = await callGroq(
-        `You are a senior CTF challenge architect. Design a REAL, multi-step hackable web challenge.
+        `You are a senior CTF challenge architect. Design a REAL, multi-step hackable web challenge that runs as a self-contained Flask app.
 The flag format is SHERK{...}.
 
 RULES:
-- Choose a SPECIFIC, real vulnerability (not vague)
-- The solve path must have 2-4 clear steps requiring actual skill
-- The flag is ONLY obtainable by successfully exploiting the vulnerability
+- Choose a SPECIFIC, real web vulnerability (not vague)
+- The solve path must have 2-4 clear steps requiring actual technical skill
+- The flag is ONLY obtainable by successfully exploiting the vulnerability — never in plaintext, never guessable
 - appType must always be "flask"
+- Category MUST be one of: WEB, CRYPTO, LINUX, NETWORK, REVERSE — NOT OSINT or FORENSICS
+- All challenge data must be self-contained in the Flask app (no external URLs, no real LinkedIn/Google/external services)
+
+VALID VULNERABILITY TYPES (pick one that fits the topic):
+SQL Injection | Command Injection | IDOR | Path Traversal | JWT alg:none | SSTI | XXE | SSRF | Broken Auth | Mass Assignment | Type Juggling | Deserialization
 
 Output ONLY this JSON (no extra text):
 {
   "title": "Punchy challenge title",
-  "scenario": "2-3 sentence briefing for the player. Sets the scene — who are they, what is the target.",
-  "vulnerability": "Exact class: SQL Injection / Command Injection / IDOR / Path Traversal / JWT alg:none / SSTI / XXE / SSRF / Broken Auth",
+  "scenario": "2-3 sentence briefing. Sets the scene — who the player is, what the target is. No references to external real-world services.",
+  "vulnerability": "Exact class from the list above",
   "appType": "flask",
   "solveSteps": ["Step 1: ...", "Step 2: ...", "Step 3: ..."],
   "flagValue": "SHERK{meaningful_lowercase_flag_value}",
-  "hint": "Subtle hint — technique name only, no steps",
+  "hint": "One technique name only — no steps, no spoilers",
   "points": ${pointsMap[difficulty] || 150},
-  "category": "${category}",
+  "category": "${safeCategory}",
   "difficulty": "${difficulty}"
 }`,
-        `Design a ${difficulty} ${category} challenge on the topic: ${topic}`
+        `Design a ${difficulty} ${safeCategory} challenge on the topic: ${topic}`
     );
 
     const design = JSON.parse(raw) as ChallengeDesign;
     if (!design.flagValue.startsWith('SHERK{')) design.flagValue = `SHERK{${design.flagValue}}`;
+    // Enforce safe category
+    if (['OSINT', 'FORENSICS', 'MISC'].includes((design.category || '').toUpperCase())) {
+        design.category = safeCategory;
+    }
     return design;
 }
 
@@ -157,6 +171,62 @@ ${app.code?.slice(0, 2500)}`
     );
 
     return JSON.parse(raw) as ValidationResult;
+}
+
+// ─── Static Challenge Generator (no Flask app — self-contained puzzle) ──────────
+export interface StaticChallengeDesign {
+    title: string;
+    description: string;
+    category: string;
+    difficulty: string;
+    points: number;
+    flagValue: string;
+    hint: string;
+}
+
+export async function generateStaticChallenge(topic: string, difficulty: string, category: string): Promise<StaticChallengeDesign> {
+    const pointsMap: Record<string, number> = { EASY: 50, MEDIUM: 150, HARD: 300, INSANE: 500 };
+
+    // Map non-self-contained categories to ones with real solvable puzzles
+    const validCategories = ['WEB', 'CRYPTO', 'LINUX', 'REVERSE', 'NETWORK', 'MISC'];
+    const safeCategory = validCategories.includes(category.toUpperCase()) ? category.toUpperCase() : 'MISC';
+
+    const raw = await callGroq(
+        `You are a senior CTF challenge author. Create a SELF-CONTAINED text-based challenge.
+The flag format is SHERK{...}.
+
+RULES:
+1. The entire challenge must be solvable from the description alone — no external URLs, no real services, no "go find X online"
+2. Embed ALL solvable data directly in the description (encoded text, cipher text, hex dump, obfuscated code snippet, etc.)
+3. The player decodes/analyzes the embedded data to extract the flag
+4. The description must CONTAIN the puzzle data — e.g. a base64 string to decode, a Caesar cipher to crack, a hex dump to analyze
+5. Category must be one of: WEB, CRYPTO, LINUX, REVERSE, NETWORK, MISC
+6. Do NOT use OSINT, do NOT reference real companies/websites/LinkedIn/Google
+
+GOOD PATTERNS by category:
+- CRYPTO: Provide ciphertext + cipher type clue. Flag is hidden in the decoded message.
+- REVERSE: Provide obfuscated pseudocode or a simple algorithm. Flag is the correct input that produces a given output.
+- MISC: ROT13/XOR/base64 chain of a secret message. Flag is the decoded plaintext.
+- WEB: Provide a fake JWT or cookie value to decode/forge. Flag is inside the decoded payload.
+- LINUX: Provide fake /etc/passwd or cron job output. Flag is derived from analyzing it.
+- NETWORK: Provide a hex packet dump or netcat output. Flag is hidden in the protocol data.
+
+Output ONLY this JSON:
+{
+  "title": "Punchy title",
+  "description": "Full challenge text. Include the ACTUAL puzzle data (ciphertext/hex/encoded string) directly in this field. Player reads this and solves it. 3-5 sentences setting the scene, then the raw puzzle data on a new line.",
+  "category": "${safeCategory}",
+  "difficulty": "${difficulty}",
+  "points": ${pointsMap[difficulty] || 150},
+  "flagValue": "SHERK{the_exact_answer_that_results_from_solving_the_puzzle}",
+  "hint": "The encoding or cipher type used — one word or phrase only"
+}`,
+        `Create a ${difficulty} ${safeCategory} static text challenge on the topic: ${topic}`
+    );
+
+    const design = JSON.parse(raw) as StaticChallengeDesign;
+    if (!design.flagValue.startsWith('SHERK{')) design.flagValue = `SHERK{${design.flagValue}}`;
+    return design;
 }
 
 // ─── Full Pipeline: Designer → Builder → Validator (with retry) ─────────────────

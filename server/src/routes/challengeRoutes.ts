@@ -11,7 +11,7 @@ import {
     generateLiveChallengeHandler, adminDeployChallenge,
     launchInstance, getMyInstance, stopInstance, getAllInstances
 } from '../controllers/instanceController';
-import { generateLiveChallenge } from '../services/challengeAgentService';
+import { generateStaticChallenge } from '../services/challengeAgentService';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -32,13 +32,13 @@ router.post('/ai-generate', authenticateToken, requireRole([UserRole.ADMIN]), as
     try {
         const { topic, difficulty, category } = req.body;
         if (!topic) { res.status(400).json({ error: 'topic is required' }); return; }
-        const { design } = await generateLiveChallenge(topic, difficulty || 'MEDIUM', category || 'WEB');
+        const design = await generateStaticChallenge(topic, difficulty || 'MEDIUM', category || 'MISC');
         const flagHash = createHash('sha256').update(design.flagValue.trim()).digest('hex');
         const challenge = await prisma.challenge.create({
             data: {
                 title: design.title,
-                description: design.scenario,
-                category: (design.category as any) || 'WEB',
+                description: design.description,
+                category: (design.category as any) || 'MISC',
                 difficulty: (design.difficulty as any) || 'MEDIUM',
                 points: design.points || 150,
                 flagHash,
