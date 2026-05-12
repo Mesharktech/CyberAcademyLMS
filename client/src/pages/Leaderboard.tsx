@@ -42,7 +42,7 @@ export const Leaderboard: React.FC = () => {
             .finally(() => setLoading(false));
     }, []);
 
-    const myEntry = entries.find(e => e.id === user?.userId);
+    const myEntry = entries.find(e => e.id === user?.id);
 
     return (
         <div className="min-h-screen bg-[#05010f] text-white p-6 md:p-10 font-sans">
@@ -89,7 +89,7 @@ export const Leaderboard: React.FC = () => {
                                 const podiumOrder = [2, 1, 3];
                                 const pos = podiumOrder[i];
                                 const heights = ['h-24', 'h-32', 'h-20'];
-                                const isMe = e.id === user?.userId;
+                                const isMe = e.id === user?.id;
                                 return (
                                     <div key={e.id} className={`flex flex-col items-center justify-end ${heights[i]}`}>
                                         <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg mb-2 ${isMe ? 'ring-2 ring-cyan-400' : ''}`}>
@@ -108,7 +108,7 @@ export const Leaderboard: React.FC = () => {
                         {/* Full table */}
                         <div className="rounded-2xl border border-white/10 overflow-hidden">
                             {entries.map(entry => {
-                                const isMe = entry.id === user?.userId;
+                                const isMe = entry.id === user?.id;
                                 return (
                                     <div key={entry.id}
                                         className={`flex items-center gap-4 px-5 py-4 border-b border-white/5 last:border-0 transition-colors ${isMe ? 'bg-cyan-500/10' : 'hover:bg-white/5'}`}>

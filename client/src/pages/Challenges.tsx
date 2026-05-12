@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import {
-    Flag, Lock, CheckCircle, ChevronDown, ChevronUp,
+    Flag, CheckCircle, ChevronDown, ChevronUp,
     Filter, Zap, Globe, Terminal, Wifi, Key, Search,
     Eye, FileSearch, Bug, Shuffle, AlertTriangle, X, Send
 } from 'lucide-react';
