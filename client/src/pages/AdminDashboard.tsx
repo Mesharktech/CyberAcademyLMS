@@ -31,6 +31,7 @@ const RANK_LABELS: Record<number, string> = { 1:'Trainee', 2:'Operative', 3:'Spe
 const DIFFICULTY_COLORS: Record<string, string> = { EASY:'text-green-400 bg-green-500/10', MEDIUM:'text-yellow-400 bg-yellow-500/10', HARD:'text-orange-400 bg-orange-500/10', INSANE:'text-red-400 bg-red-500/10' };
 const ANN_COLORS: Record<string, string> = { INFO:'text-blue-400 bg-blue-500/10 border-blue-500/30', WARNING:'text-yellow-400 bg-yellow-500/10 border-yellow-500/30', CRITICAL:'text-red-400 bg-red-500/10 border-red-500/30', SUCCESS:'text-green-400 bg-green-500/10 border-green-500/30' };
 const CATEGORIES = ['WEB','LINUX','WINDOWS','NETWORK','CRYPTO','FORENSICS','OSINT','MALWARE','REVERSE','MISC'];
+const AI_CATEGORIES = ['WEB','CRYPTO','LINUX','REVERSE','NETWORK','MISC'];
 
 const emptyCourse = () => ({ title:'', slug:'', description:'', thumbnailUrl:'', price:0 });
 const emptyModule = (courseId: string, orderIndex: number) => ({ courseId, title:'', type:'TEXT' as ModuleType, content:'', videoUrl:'', orderIndex, xpReward:50, requiredRank:1 });
@@ -350,10 +351,10 @@ const ChallengesTab: React.FC = () => {
             {modal === 'ai' && (
                 <Modal title="AI Challenge Generator" onClose={() => setModal(null)}>
                     <div className="space-y-4">
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300 text-sm"><Cpu size={14} /> AI will generate a complete challenge including flag from your topic.</div>
-                        <Field label="Topic *" value={aiForm.topic} onChange={v => setAiForm(f => ({ ...f, topic:v }))} placeholder="e.g. SQL injection in login forms, JWT manipulation, OSINT on LinkedIn..." />
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300 text-sm"><Cpu size={14} /> Generates a self-contained static challenge with embedded puzzle data. Flag is revealed after creation.</div>
+                        <Field label="Topic *" value={aiForm.topic} onChange={v => setAiForm(f => ({ ...f, topic:v }))} placeholder="e.g. JWT decoding, Caesar cipher, base64 encoding, path traversal..." />
                         <div className="grid grid-cols-2 gap-4">
-                            <div><label className="block text-sm text-gray-400 mb-1">Category</label><select value={aiForm.category} onChange={e => setAiForm(f => ({ ...f, category:e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50">{CATEGORIES.map(c => <option key={c} value={c} className="bg-[#0d0d1a]">{c}</option>)}</select></div>
+                            <div><label className="block text-sm text-gray-400 mb-1">Category</label><select value={aiForm.category} onChange={e => setAiForm(f => ({ ...f, category:e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50">{AI_CATEGORIES.map(c => <option key={c} value={c} className="bg-[#0d0d1a]">{c}</option>)}</select></div>
                             <div><label className="block text-sm text-gray-400 mb-1">Difficulty</label><select value={aiForm.difficulty} onChange={e => setAiForm(f => ({ ...f, difficulty:e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500/50">{['EASY','MEDIUM','HARD','INSANE'].map(d => <option key={d} value={d} className="bg-[#0d0d1a]">{d}</option>)}</select></div>
                         </div>
                         <button onClick={aiGenerate} disabled={saving || !aiForm.topic.trim()} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 disabled:opacity-50 py-3 rounded-xl font-semibold transition-all">{saving ? <><RefreshCw size={15} className="animate-spin" /> Generating...</> : <><Cpu size={15} /> Generate & Save</>}</button>
@@ -854,7 +855,7 @@ const AIGeneratorTab: React.FC<{ courses: Course[] }> = ({ courses }) => {
                             {['EASY','MEDIUM','HARD','INSANE'].map(d => <option key={d} value={d} className="bg-[#0d0d1a]">{d}</option>)}
                         </select>
                         <select value={liveCat} onChange={e => setLiveCat(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none">
-                            {['WEB','CRYPTO','FORENSICS','REVERSE','PWN','OSINT','NETWORK','MISC'].map(c => <option key={c} value={c} className="bg-[#0d0d1a]">{c}</option>)}
+                            {AI_CATEGORIES.map(c => <option key={c} value={c} className="bg-[#0d0d1a]">{c}</option>)}
                         </select>
                     </div>
 
