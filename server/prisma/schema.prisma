@@ -34,7 +34,8 @@ model User {
   courses          Course[]
   progress         UserProgress[]
   enrollments      Enrollment[]
-  challengeSolves  ChallengeSolve[]
+  challengeSolves    ChallengeSolve[]
+  challengeInstances ChallengeInstance[]
 }
 
 model Course {
@@ -161,12 +162,39 @@ model Challenge {
   flagHash    String
   hint        String?
   isActive    Boolean             @default(true)
+  isLive      Boolean             @default(false)
+  liveUrl     String?
+  appCode     String?
   solveCount  Int                 @default(0)
   authorId    String?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 
   solves      ChallengeSolve[]
+  instances   ChallengeInstance[]
+}
+
+enum InstanceStatus {
+  STARTING
+  RUNNING
+  STOPPED
+  EXPIRED
+  FAILED
+}
+
+model ChallengeInstance {
+  id           String         @id @default(uuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId  String
+  challenge    Challenge      @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  flyAppName   String?
+  flyMachineId String?
+  liveUrl      String?
+  uniqueFlag   String
+  status       InstanceStatus @default(STARTING)
+  expiresAt    DateTime
+  createdAt    DateTime       @default(now())
 }
 
 model ChallengeSolve {

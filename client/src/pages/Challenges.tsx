@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import {
     Flag, CheckCircle, ChevronDown, ChevronUp,
     Filter, Zap, Globe, Terminal, Wifi, Key, Search,
-    Eye, FileSearch, Bug, Shuffle, AlertTriangle, X, Send
+    Eye, FileSearch, Bug, Shuffle, AlertTriangle, X, Send, PlayCircle
 } from 'lucide-react';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -18,6 +19,8 @@ interface Challenge {
     solveCount: number;
     solved: boolean;
     solvedAt?: string;
+    isLive?: boolean;
+    liveUrl?: string;
 }
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -46,11 +49,25 @@ const DIFFICULTIES = ['ALL', 'EASY', 'MEDIUM', 'HARD', 'INSANE'];
 
 // ─── Challenge Card ─────────────────────────────────────────────────────────────
 const ChallengeCard: React.FC<{ challenge: Challenge; onSolve: (id: string) => void }> = ({ challenge, onSolve }) => {
+    const navigate = useNavigate();
     const [expanded, setExpanded] = useState(false);
     const [flag, setFlag] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [launching, setLaunching] = useState(false);
     const [result, setResult] = useState<{ correct: boolean; message: string } | null>(null);
     const [showHint, setShowHint] = useState(false);
+
+    const launchLab = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (launching) return;
+        setLaunching(true);
+        try {
+            await api.post(`/challenges/${challenge.id}/launch`);
+            navigate(`/lab/${challenge.id}`);
+        } catch {
+            setLaunching(false);
+        }
+    };
 
     const meta = DIFFICULTY_META[challenge.difficulty];
 
@@ -151,12 +168,18 @@ const ChallengeCard: React.FC<{ challenge: Challenge; onSolve: (id: string) => v
                         </div>
                     )}
 
-                    {/* Flag submission */}
+                    {/* Flag submission / Launch Lab */}
                     {challenge.solved ? (
                         <div className="flex items-center gap-2 text-green-400 text-sm font-semibold">
                             <CheckCircle size={16} />
                             Captured {challenge.solvedAt ? `· ${new Date(challenge.solvedAt).toLocaleDateString()}` : ''}
                         </div>
+                    ) : challenge.isLive ? (
+                        <button onClick={launchLab} disabled={launching}
+                            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 disabled:opacity-50 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all w-full justify-center">
+                            <PlayCircle size={15} />
+                            {launching ? 'Launching container...' : 'Launch Live Lab'}
+                        </button>
                     ) : (
                         <form onSubmit={submit} className="flex gap-2">
                             <div className="flex-grow relative">

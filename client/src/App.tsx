@@ -14,6 +14,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminRoute from './components/AdminRoute';
 import Challenges from './pages/Challenges';
 import Leaderboard from './pages/Leaderboard';
+import LabInstance from './pages/LabInstance';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ function App() {
                 <Route path="courses/:slug" element={<PrivateRoute><CoursePlayer /></PrivateRoute>} />
                 <Route path="labs" element={<PrivateRoute><Labs /></PrivateRoute>} />
                 <Route path="challenges" element={<PrivateRoute><Challenges /></PrivateRoute>} />
+                <Route path="lab/:challengeId" element={<PrivateRoute><LabInstance /></PrivateRoute>} />
                 <Route path="leaderboard" element={<Leaderboard />} />
                 <Route path="admin" element={<PrivateRoute><AdminRoute><AdminDashboard /></AdminRoute></PrivateRoute>} />
               </Route>

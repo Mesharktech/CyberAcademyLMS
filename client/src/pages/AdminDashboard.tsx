@@ -760,6 +760,52 @@ const AIGeneratorTab: React.FC<{ courses: Course[] }> = ({ courses }) => {
     const [savedOk, setSavedOk] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
+    // ── Live Challenge Generator state ──
+    const [liveTab, setLiveTab] = useState<'static'|'live'>('static');
+    const [liveTopic, setLiveTopic] = useState('');
+    const [liveDiff, setLiveDiff] = useState('MEDIUM');
+    const [liveCat, setLiveCat] = useState('WEB');
+    const [liveLoading, setLiveLoading] = useState(false);
+    const [liveStage, setLiveStage] = useState<'idle'|'designing'|'building'|'validating'|'done'>('idle');
+    const [liveResult, setLiveResult] = useState<any>(null);
+    const [deploying, setDeploying] = useState(false);
+    const [deployedUrl, setDeployedUrl] = useState('');
+
+    const generateLive = async () => {
+        if (!liveTopic.trim()) return;
+        setLiveLoading(true); setLiveResult(null); setDeployedUrl(''); setErr('');
+        try {
+            setLiveStage('designing');
+            await new Promise(r => setTimeout(r, 800));
+            setLiveStage('building');
+            await new Promise(r => setTimeout(r, 800));
+            setLiveStage('validating');
+            const r = await api.post('/challenges/ai-generate-live', { topic: liveTopic, difficulty: liveDiff, category: liveCat });
+            setLiveResult(r.data);
+            setLiveStage('done');
+        } catch (e: any) {
+            setErr(e.response?.data?.error || 'Live generation failed');
+            setLiveStage('idle');
+        } finally { setLiveLoading(false); }
+    };
+
+    const deployLive = async () => {
+        if (!liveResult?.challenge?.id) return;
+        setDeploying(true);
+        try {
+            const r = await api.post(`/challenges/${liveResult.challenge.id}/deploy`);
+            setDeployedUrl(r.data.url);
+        } catch (e: any) {
+            setErr(e.response?.data?.error || 'Deployment failed — check FLY_API_TOKEN');
+        } finally { setDeploying(false); }
+    };
+
+    const STAGES: Array<'designing'|'building'|'validating'|'done'> = ['designing', 'building', 'validating', 'done'];
+    const STAGE_LABELS: Record<'designing'|'building'|'validating'|'done', string> = {
+        designing: 'Agent 1: Designing...', building: 'Agent 2: Building...',
+        validating: 'Agent 3: Validating...', done: 'Done'
+    };
+
     const generate = async () => {
         if (!file) return;
         setLoading(true); setResult(null); setErr(''); setSavedOk(false);
@@ -786,6 +832,103 @@ const AIGeneratorTab: React.FC<{ courses: Course[] }> = ({ courses }) => {
             {err && <Err msg={err} onClose={() => setErr('')} />}
             {savedOk && <div className="flex items-center gap-2 text-green-400 text-sm bg-green-500/10 border border-green-500/30 rounded-xl p-3"><CheckCircle size={14} /> Module saved to course.</div>}
 
+            {/* ── Tab switcher ── */}
+            <div className="flex gap-2 bg-white/5 rounded-2xl p-1.5 border border-white/10">
+                {(['static','live'] as const).map(t => (
+                    <button key={t} onClick={() => setLiveTab(t)} className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${liveTab===t ? 'bg-gradient-to-r from-purple-600 to-cyan-600 text-white' : 'text-gray-400 hover:text-white'}`}>
+                        {t === 'static' ? '📄 PDF → Module' : '🧬 Live Challenge Lab'}
+                    </button>
+                ))}
+            </div>
+
+            {/* ── Live Challenge Generator ── */}
+            {liveTab === 'live' && (
+                <div className="rounded-2xl bg-white/5 border border-white/10 p-6 space-y-4">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-2 rounded-xl bg-gradient-to-br from-red-500 to-purple-600"><Flag size={17} className="text-white" /></div>
+                        <div><p className="font-semibold text-white">3-Agent Live Challenge Pipeline</p><p className="text-xs text-gray-400">Designer → Builder → Validator → Deploy to Fly.io</p></div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <input value={liveTopic} onChange={e => setLiveTopic(e.target.value)} placeholder="Topic (e.g. SQL injection, IDOR)" className="col-span-1 md:col-span-1 bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-cyan-500/50 placeholder:text-gray-600" />
+                        <select value={liveDiff} onChange={e => setLiveDiff(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none">
+                            {['EASY','MEDIUM','HARD','INSANE'].map(d => <option key={d} value={d} className="bg-[#0d0d1a]">{d}</option>)}
+                        </select>
+                        <select value={liveCat} onChange={e => setLiveCat(e.target.value)} className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none">
+                            {['WEB','CRYPTO','FORENSICS','REVERSE','PWN','OSINT','NETWORK','MISC'].map(c => <option key={c} value={c} className="bg-[#0d0d1a]">{c}</option>)}
+                        </select>
+                    </div>
+
+                    {/* Pipeline stages */}
+                    {liveStage !== 'idle' && (
+                        <div className="flex items-center gap-3">
+                            {STAGES.map((s, i) => {
+                                const stageOrder = ['designing', 'building', 'validating', 'done'];
+                                const stageIdx = stageOrder.indexOf(liveStage);
+                                const done = i < stageIdx || liveStage === 'done';
+                                const active = s === liveStage && liveStage !== 'done';
+                                return (
+                                    <React.Fragment key={s}>
+                                        <div className={`flex items-center gap-2 text-xs font-semibold ${done ? 'text-green-400' : active ? 'text-cyan-400' : 'text-gray-600'}`}>
+                                            {done ? <CheckCircle size={13} /> : active ? <RefreshCw size={13} className="animate-spin" /> : <div className="w-3 h-3 rounded-full border border-current" />}
+                                            {STAGE_LABELS[s]}
+                                        </div>
+                                        {i < STAGES.length - 1 && <div className={`flex-1 h-px ${done ? 'bg-green-500/40' : 'bg-white/10'}`} />}
+                                    </React.Fragment>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    <button onClick={generateLive} disabled={liveLoading || !liveTopic.trim()} className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-500 hover:to-purple-500 disabled:opacity-50 py-3 rounded-xl font-semibold text-sm transition-all">
+                        {liveLoading ? <><RefreshCw size={14} className="animate-spin" /> {liveStage !== 'idle' ? STAGE_LABELS[liveStage] : 'Working...'}</> : '⚡ Generate Live Challenge'}
+                    </button>
+
+                    {liveResult && (
+                        <div className="space-y-4 pt-2 border-t border-white/10">
+                            <div className="flex items-start justify-between gap-4">
+                                <div>
+                                    <p className="text-white font-bold text-lg">{liveResult.challenge?.title}</p>
+                                    <div className="flex gap-2 mt-1 flex-wrap">
+                                        <span className="text-xs bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full">{liveResult.challenge?.difficulty}</span>
+                                        <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded-full">{liveResult.challenge?.points} pts</span>
+                                        <span className="text-xs bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full">{liveResult.validation?.approved ? '✓ Validated' : '⚠ Manual review'}</span>
+                                    </div>
+                                </div>
+                                {!deployedUrl ? (
+                                    <button onClick={deployLive} disabled={deploying} className="flex-shrink-0 flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-purple-600 disabled:opacity-50 px-4 py-2 rounded-xl text-sm font-semibold">
+                                        {deploying ? <><RefreshCw size={12} className="animate-spin" /> Deploying...</> : '🚀 Deploy to Fly.io'}
+                                    </button>
+                                ) : (
+                                    <a href={deployedUrl} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 flex items-center gap-2 bg-green-600/20 border border-green-500/30 text-green-400 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600/30 transition-all">
+                                        ✓ Live at {deployedUrl.replace('https://','')}
+                                    </a>
+                                )}
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 font-semibold">Solve Path</p>
+                                <ol className="space-y-1">
+                                    {liveResult.design?.solveSteps?.map((s: string, i: number) => (
+                                        <li key={i} className="text-sm text-gray-300 flex gap-2"><span className="text-cyan-500 font-mono">{i+1}.</span>{s}</li>
+                                    ))}
+                                </ol>
+                            </div>
+                            {liveResult.validation?.issues?.length > 0 && (
+                                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
+                                    <p className="text-yellow-400 text-xs font-semibold mb-1">Validator notes:</p>
+                                    {liveResult.validation.issues.map((issue: string, i: number) => <p key={i} className="text-yellow-300/70 text-xs">• {issue}</p>)}
+                                </div>
+                            )}
+                            <div className="bg-black/40 rounded-xl p-3 border border-white/5">
+                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 font-semibold">Plain flag (store securely)</p>
+                                <code className="text-cyan-400 font-mono text-sm">{liveResult.plainFlag}</code>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* ── PDF Module Generator ── */}
+            {liveTab === 'static' && (
             <div className="rounded-2xl bg-white/5 border border-white/10 p-6">
                 <div className="flex items-center gap-3 mb-4"><div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-600"><Cpu size={17} className="text-white" /></div><div><p className="font-semibold text-white">PDF → Course Module</p><p className="text-xs text-gray-400">Two AI agents: Generator + Authenticity Reviewer</p></div></div>
                 <div onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f?.type === 'application/pdf') setFile(f); else setErr('PDF only'); }} onClick={() => fileRef.current?.click()} className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${dragging ? 'border-cyan-400 bg-cyan-500/10' : file ? 'border-green-500/50 bg-green-500/5' : 'border-white/10 hover:border-white/20 hover:bg-white/5'}`}>
@@ -794,6 +937,7 @@ const AIGeneratorTab: React.FC<{ courses: Course[] }> = ({ courses }) => {
                 </div>
                 <button onClick={generate} disabled={!file || loading} className="mt-4 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-cyan-600 disabled:opacity-50 py-3 rounded-xl font-semibold transition-all">{loading ? <><RefreshCw size={15} className="animate-spin" /> Two agents working...</> : <><Cpu size={15} /> Generate Module</>}</button>
             </div>
+            )}
 
             {result && (
                 <div className="space-y-4">
