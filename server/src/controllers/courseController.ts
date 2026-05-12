@@ -456,6 +456,99 @@ export const reorderModules = async (req: AuthRequest, res: Response) => {
     }
 };
 
+// Admin Analytics — platform-wide stats
+export const getAdminAnalytics = async (_req: AuthRequest, res: Response) => {
+    try {
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+        const [
+            totalUsers, newUsersMonth, newUsersWeek,
+            totalCourses, publishedCourses,
+            totalModules, totalEnrollments,
+            revenueAgg, completedProgress,
+            topCourses, recentUsers
+        ] = await Promise.all([
+            prisma.user.count(),
+            prisma.user.count({ where: { createdAt: { gte: monthStart } } }),
+            prisma.user.count({ where: { createdAt: { gte: weekStart } } }),
+            prisma.course.count(),
+            prisma.course.count({ where: { isPublished: true } }),
+            prisma.module.count(),
+            db.enrollment.count(),
+            db.enrollment.aggregate({ _sum: { amountPaid: true } }),
+            prisma.userProgress.count({ where: { completed: true } }),
+            db.enrollment.groupBy({
+                by: ['courseId'],
+                _count: { courseId: true },
+                orderBy: { _count: { courseId: 'desc' } },
+                take: 5
+            }),
+            prisma.user.findMany({
+                orderBy: { createdAt: 'desc' },
+                take: 8,
+                select: { id: true, username: true, email: true, role: true, xp: true, rank: true, createdAt: true, isActive: true }
+            })
+        ]);
+
+        // Resolve course titles for top courses
+        const topCourseIds = topCourses.map((t: any) => t.courseId);
+        const topCourseDocs = await prisma.course.findMany({
+            where: { id: { in: topCourseIds } },
+            select: { id: true, title: true, isPublished: true }
+        });
+        const topCoursesFormatted = topCourses.map((t: any) => {
+            const doc = topCourseDocs.find((c: any) => c.id === t.courseId);
+            return { id: t.courseId, title: doc?.title || 'Unknown', enrollments: t._count.courseId, isPublished: doc?.isPublished };
+        });
+
+        const totalRevenue = Number(revenueAgg._sum?.amountPaid || 0);
+
+        res.json({
+            users: { total: totalUsers, newThisMonth: newUsersMonth, newThisWeek: newUsersWeek },
+            courses: { total: totalCourses, published: publishedCourses, modules: totalModules },
+            enrollments: { total: totalEnrollments, revenue: totalRevenue },
+            completions: completedProgress,
+            topCourses: topCoursesFormatted,
+            recentUsers
+        });
+    } catch (error) {
+        console.error('Admin Analytics Error:', error);
+        res.status(500).json({ error: 'Failed to fetch analytics' });
+    }
+};
+
+// Admin — list all users
+export const getAdminUsers = async (req: AuthRequest, res: Response) => {
+    try {
+        const page = parseInt(String(req.query.page || '1'));
+        const limit = 20;
+        const skip = (page - 1) * limit;
+        const search = String(req.query.search || '');
+
+        const where = search
+            ? { OR: [{ username: { contains: search, mode: 'insensitive' as const } }, { email: { contains: search, mode: 'insensitive' as const } }] }
+            : {};
+
+        const [users, total] = await Promise.all([
+            prisma.user.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+                select: { id: true, username: true, email: true, role: true, xp: true, rank: true, isActive: true, isEmailVerified: true, createdAt: true, lastLoginAt: true }
+            }),
+            prisma.user.count({ where })
+        ]);
+
+        res.json({ users, total, page, pages: Math.ceil(total / limit) });
+    } catch (error) {
+        console.error('Admin Users Error:', error);
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+};
+
 // Get ALL courses for admin (including unpublished) — full content
 export const getAllCoursesAdmin = async (req: AuthRequest, res: Response) => {
     try {

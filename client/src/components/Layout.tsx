@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, User, Terminal, Settings, Menu, X } from 'lucide-react';
+import { LogOut, User, Terminal, Settings, Menu, X, Flag, Trophy } from 'lucide-react';
 import { GlobalChatWidget } from './GlobalChatWidget';
 
 export const Layout: React.FC = () => {
@@ -40,6 +40,12 @@ export const Layout: React.FC = () => {
                         <Link to="/courses" className={`text-sm font-semibold tracking-wider font-orbitron transition-all duration-300 ${location.pathname === '/courses' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] border-b-2 border-cyan-400 pb-1' : 'text-gray-400 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]'}`}>COURSES</Link>
                         <Link to="/labs" className={`text-sm font-semibold tracking-wider font-orbitron transition-all duration-300 flex items-center gap-1 ${location.pathname === '/labs' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] border-b-2 border-cyan-400 pb-1' : 'text-gray-400 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]'}`}>
                             <Terminal size={14} /> LABS
+                        </Link>
+                        <Link to="/challenges" className={`text-sm font-semibold tracking-wider font-orbitron transition-all duration-300 flex items-center gap-1 ${location.pathname === '/challenges' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] border-b-2 border-cyan-400 pb-1' : 'text-gray-400 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]'}`}>
+                            <Flag size={14} /> RANGE
+                        </Link>
+                        <Link to="/leaderboard" className={`text-sm font-semibold tracking-wider font-orbitron transition-all duration-300 flex items-center gap-1 ${location.pathname === '/leaderboard' ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.8)] border-b-2 border-yellow-400 pb-1' : 'text-gray-400 hover:text-yellow-300 hover:drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]'}`}>
+                            <Trophy size={14} /> RANKS
                         </Link>
                         {user?.role === 'ADMIN' && (
                             <Link to="/admin" className={`text-sm font-semibold tracking-wider font-orbitron transition-all duration-300 flex items-center gap-1 ${location.pathname.startsWith('/admin') ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.8)] border-b-2 border-yellow-400 pb-1' : 'text-gray-400 hover:text-yellow-300 hover:drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]'}`}>
@@ -87,6 +93,12 @@ export const Layout: React.FC = () => {
                         <Link onClick={() => setMobileMenuOpen(false)} to="/courses" className={`text-base font-semibold tracking-wider font-orbitron transition-all ${location.pathname === '/courses' ? 'text-cyan-400' : 'text-gray-400'}`}>COURSES</Link>
                         <Link onClick={() => setMobileMenuOpen(false)} to="/labs" className={`text-base font-semibold tracking-wider font-orbitron transition-all flex items-center gap-2 ${location.pathname === '/labs' ? 'text-cyan-400' : 'text-gray-400'}`}>
                             <Terminal size={16} /> LABS
+                        </Link>
+                        <Link onClick={() => setMobileMenuOpen(false)} to="/challenges" className={`text-base font-semibold tracking-wider font-orbitron transition-all flex items-center gap-2 ${location.pathname === '/challenges' ? 'text-cyan-400' : 'text-gray-400'}`}>
+                            <Flag size={16} /> RANGE
+                        </Link>
+                        <Link onClick={() => setMobileMenuOpen(false)} to="/leaderboard" className={`text-base font-semibold tracking-wider font-orbitron transition-all flex items-center gap-2 ${location.pathname === '/leaderboard' ? 'text-yellow-400' : 'text-gray-400'}`}>
+                            <Trophy size={16} /> RANKS
                         </Link>
                         {user?.role === 'ADMIN' && (
                             <Link onClick={() => setMobileMenuOpen(false)} to="/admin" className={`text-base font-semibold tracking-wider font-orbitron transition-all flex items-center gap-2 ${location.pathname.startsWith('/admin') ? 'text-yellow-400' : 'text-gray-400'}`}>

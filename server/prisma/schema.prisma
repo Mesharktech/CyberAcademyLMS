@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum UserRole {
@@ -30,9 +31,10 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  courses     Course[]
-  progress    UserProgress[]
-  enrollments Enrollment[]
+  courses          Course[]
+  progress         UserProgress[]
+  enrollments      Enrollment[]
+  challengeSolves  ChallengeSolve[]
 }
 
 model Course {
@@ -110,5 +112,71 @@ model Enrollment {
   createdAt     DateTime      @default(now())
 
   @@unique([userId, courseId])
+}
+
+enum AnnouncementType {
+  INFO
+  WARNING
+  CRITICAL
+  SUCCESS
+}
+
+model Announcement {
+  id        String           @id @default(uuid())
+  title     String
+  content   String
+  type      AnnouncementType @default(INFO)
+  isActive  Boolean          @default(true)
+  authorId  String
+  createdAt DateTime         @default(now())
+}
+
+enum ChallengeDifficulty {
+  EASY
+  MEDIUM
+  HARD
+  INSANE
+}
+
+enum ChallengeCategory {
+  WEB
+  LINUX
+  WINDOWS
+  NETWORK
+  CRYPTO
+  FORENSICS
+  OSINT
+  MALWARE
+  REVERSE
+  MISC
+}
+
+model Challenge {
+  id          String              @id @default(uuid())
+  title       String
+  description String
+  category    ChallengeCategory
+  difficulty  ChallengeDifficulty
+  points      Int                 @default(100)
+  flagHash    String
+  hint        String?
+  isActive    Boolean             @default(true)
+  solveCount  Int                 @default(0)
+  authorId    String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  solves      ChallengeSolve[]
+}
+
+model ChallengeSolve {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  solvedAt    DateTime  @default(now())
+
+  @@unique([userId, challengeId])
 }
 

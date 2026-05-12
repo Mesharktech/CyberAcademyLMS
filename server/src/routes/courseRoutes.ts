@@ -2,7 +2,8 @@ import express from 'express';
 import {
     createCourse, getCourses, getCourseBySlug, addModule, updateProgress,
     updateCourse, deleteCourse, publishCourse, getMyEnrollments,
-    updateModule, deleteModule, reorderModules, getAllCoursesAdmin
+    updateModule, deleteModule, reorderModules, getAllCoursesAdmin,
+    getAdminAnalytics, getAdminUsers
 } from '../controllers/courseController';
 import { authenticateToken, requireRole } from '../middleware/authMiddleware';
 import { UserRole } from '@prisma/client';
@@ -11,6 +12,8 @@ const router = express.Router();
 
 // ─── Admin only — MUST be before /:slug to avoid being caught ──
 router.get('/admin/all', authenticateToken, requireRole([UserRole.ADMIN]), getAllCoursesAdmin);
+router.get('/admin/analytics', authenticateToken, requireRole([UserRole.ADMIN]), getAdminAnalytics);
+router.get('/admin/users', authenticateToken, requireRole([UserRole.ADMIN]), getAdminUsers);
 
 // ─── Enrolled Courses (Dashboard) ──────────────────────────────
 router.get('/my-enrollments', authenticateToken, getMyEnrollments);

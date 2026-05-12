@@ -27,10 +27,11 @@ app.use(cookieParser());
 import authRoutes from './routes/authRoutes';
 import aiRoutes from './routes/aiRoutes';
 import labRoutes from './routes/labRoutes';
-
 import courseRoutes from './routes/courseRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import userRoutes from './routes/userRoutes';
+import challengeRoutes from './routes/challengeRoutes';
+import adminRoutes from './routes/adminRoutes';
 
 // Authentication Rate Limiter
 const authLimiter = rateLimit({
@@ -48,6 +49,8 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/labs', labRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/challenges', challengeRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health Check
 app.get('/health', (req: express.Request, res: express.Response) => {
