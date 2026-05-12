@@ -149,7 +149,7 @@ export const getMyInstance = async (req: AuthRequest, res: Response) => {
 
         const { id: challengeId } = req.params as { id: string };
         const instance = await db.challengeInstance.findFirst({
-            where: { userId, challengeId, status: { in: ['STARTING', 'RUNNING'] } },
+            where: { userId, challengeId },
             orderBy: { createdAt: 'desc' }
         });
 

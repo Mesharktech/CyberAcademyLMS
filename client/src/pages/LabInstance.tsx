@@ -72,14 +72,15 @@ export const LabInstance: React.FC = () => {
             ]);
             setInstance(instRes.data);
             setChallenge(challRes || null);
-        } catch {
-            navigate('/challenges');
+        } catch (err: any) {
+            // 404 = no instance at all, redirect. Other errors = stay and show message.
+            if (err?.response?.status === 404) navigate('/challenges');
         }
     }, [challengeId, navigate]);
 
     useEffect(() => { fetchInstance(); }, [fetchInstance]);
 
-    // Poll while STARTING
+    // Poll only while STARTING — stop on any terminal state
     useEffect(() => {
         if (instance?.status !== 'STARTING') return;
         const interval = setInterval(fetchInstance, 4000);
@@ -101,6 +102,18 @@ export const LabInstance: React.FC = () => {
             navigate('/challenges');
         } catch {
             setStopping(false);
+        }
+    };
+
+    const retryLaunch = async () => {
+        if (!challengeId) return;
+        try {
+            // Delete failed instance first, then relaunch
+            await api.delete(`/challenges/${challengeId}/instance`).catch(() => {});
+            await api.post(`/challenges/${challengeId}/launch`);
+            await fetchInstance();
+        } catch {
+            // stay on page, fetchInstance will show updated state
         }
     };
 
@@ -220,10 +233,29 @@ export const LabInstance: React.FC = () => {
                 {instance.status === 'FAILED' && (
                     <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-5 mb-4 flex items-center gap-4">
                         <AlertTriangle size={20} className="text-red-400 flex-shrink-0" />
-                        <div>
-                            <p className="text-red-300 font-semibold text-sm">Deployment failed</p>
-                            <p className="text-gray-400 text-xs mt-0.5">Check Fly.io credentials or try launching again.</p>
+                        <div className="flex-1">
+                            <p className="text-red-300 font-semibold text-sm">Container deployment failed</p>
+                            <p className="text-gray-400 text-xs mt-0.5">The Fly.io container failed to start. Check that FLY_API_TOKEN is set on the server.</p>
                         </div>
+                        <button onClick={retryLaunch}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 text-sm font-semibold transition-colors flex-shrink-0">
+                            <RefreshCw size={14} /> Retry
+                        </button>
+                    </div>
+                )}
+
+                {/* Expired / Stopped state */}
+                {(instance.status === 'EXPIRED' || instance.status === 'STOPPED') && (
+                    <div className="bg-gray-500/10 border border-gray-500/20 rounded-2xl p-5 mb-4 flex items-center gap-4">
+                        <AlertTriangle size={20} className="text-gray-400 flex-shrink-0" />
+                        <div className="flex-1">
+                            <p className="text-gray-300 font-semibold text-sm">Instance {instance.status === 'EXPIRED' ? 'expired' : 'stopped'}</p>
+                            <p className="text-gray-500 text-xs mt-0.5">Launch a new instance to continue.</p>
+                        </div>
+                        <button onClick={retryLaunch}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-sm font-semibold transition-colors flex-shrink-0">
+                            <RefreshCw size={14} /> Relaunch
+                        </button>
                     </div>
                 )}
 
