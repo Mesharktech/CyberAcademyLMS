@@ -23,6 +23,7 @@ export const getChallenges = async (req: AuthRequest, res: Response) => {
             select: {
                 id: true, title: true, description: true, category: true,
                 difficulty: true, points: true, hint: true, solveCount: true,
+                isLive: true, liveUrl: true,
                 createdAt: true,
                 solves: userId ? { where: { userId }, select: { solvedAt: true } } : false
             }
