@@ -192,36 +192,39 @@ export async function generateStaticChallenge(topic: string, difficulty: string,
     const safeCategory = validCategories.includes(category.toUpperCase()) ? category.toUpperCase() : 'MISC';
 
     const raw = await callGroq(
-        `You are a senior CTF challenge author. Create a SELF-CONTAINED text-based challenge.
+        `You are a senior CTF challenge author. Create a SELF-CONTAINED text-based challenge where ALL data needed to solve it is embedded directly in the description.
 The flag format is SHERK{...}.
 
-RULES:
-1. The entire challenge must be solvable from the description alone — no external URLs, no real services, no "go find X online"
-2. Embed ALL solvable data directly in the description (encoded text, cipher text, hex dump, obfuscated code snippet, etc.)
-3. The player decodes/analyzes the embedded data to extract the flag
-4. The description must CONTAIN the puzzle data — e.g. a base64 string to decode, a Caesar cipher to crack, a hex dump to analyze
-5. Category must be one of: WEB, CRYPTO, LINUX, REVERSE, NETWORK, MISC
-6. Do NOT use OSINT, do NOT reference real companies/websites/LinkedIn/Google
+CRITICAL RULES — violating any one makes the challenge unsolvable:
+1. The challenge MUST be solvable using ONLY the description text — no servers, no external URLs, no live apps
+2. You MUST generate the encoded/obfuscated data YOURSELF and include it verbatim in the description
+3. The flagValue MUST be the exact result of decoding/solving the embedded data
+4. Do NOT say "submit the token to the server" or "gain admin access" — there is no server
+5. Do NOT copy or reference jwt.io, CyberChef, or any real external tool URLs
+6. Do NOT use OSINT — no LinkedIn, Google, real companies
+7. Category must be: WEB, CRYPTO, LINUX, REVERSE, NETWORK, or MISC
 
-GOOD PATTERNS by category:
-- CRYPTO: Provide ciphertext + cipher type clue. Flag is hidden in the decoded message.
-- REVERSE: Provide obfuscated pseudocode or a simple algorithm. Flag is the correct input that produces a given output.
-- MISC: ROT13/XOR/base64 chain of a secret message. Flag is the decoded plaintext.
-- WEB: Provide a fake JWT or cookie value to decode/forge. Flag is inside the decoded payload.
-- LINUX: Provide fake /etc/passwd or cron job output. Flag is derived from analyzing it.
-- NETWORK: Provide a hex packet dump or netcat output. Flag is hidden in the protocol data.
+SELF-CONTAINED PATTERNS — pick one, generate the actual data:
+- CRYPTO: Generate a real base64/ROT13/Caesar-encoded string of a secret phrase. Include the encoded string. Flag = the decoded phrase wrapped in SHERK{}.
+  Example description ending: "Encoded message: U0hFUkt7Y2Flc2FyX3dhc19oZXJlfQ==" → flagValue: "SHERK{caesar_was_here}"
+- WEB/JWT: Create a fake JWT where the payload JSON contains the flag field. Encode it yourself with base64url. Include the full JWT. Flag = value of "flag" field in decoded payload.
+  Example: header.eyJyb2xlIjoiZ3Vlc3QiLCJmbGFnIjoiU0hFUkt7and0X3BheWxvYWRzX2FyZV9ub3Rfc2VjcmV0fSJ9.fakesig → flagValue: "SHERK{jwt_payloads_are_not_secret}"
+- LINUX: Provide fake /etc/shadow or .bash_history lines with a hash or secret. Flag is extracted from analyzing the data.
+- REVERSE: Provide a short Python/JS snippet with obfuscated logic. Flag is the output when run or the correct input.
+- NETWORK: Provide ASCII hex bytes of a message. Flag is the decoded ASCII.
+  Example: "Intercepted bytes: 53 48 45 52 4b 7b 68 65 78 5f 64 65 63 6f 64 65 64 7d" → flagValue: "SHERK{hex_decoded}"
 
-Output ONLY this JSON:
+Output ONLY this JSON — no extra text before or after:
 {
-  "title": "Punchy title",
-  "description": "Full challenge text. Include the ACTUAL puzzle data (ciphertext/hex/encoded string) directly in this field. Player reads this and solves it. 3-5 sentences setting the scene, then the raw puzzle data on a new line.",
+  "title": "Punchy title relevant to the puzzle",
+  "description": "2-3 sentences setting the scene (no server references). Then on a new line, include the ACTUAL encoded/obfuscated data string the player must decode.",
   "category": "${safeCategory}",
   "difficulty": "${difficulty}",
   "points": ${pointsMap[difficulty] || 150},
-  "flagValue": "SHERK{the_exact_answer_that_results_from_solving_the_puzzle}",
-  "hint": "The encoding or cipher type used — one word or phrase only"
+  "flagValue": "SHERK{exact_result_of_decoding_the_embedded_data}",
+  "hint": "Name of encoding or technique — one phrase only, no steps"
 }`,
-        `Create a ${difficulty} ${safeCategory} static text challenge on the topic: ${topic}`
+        `Create a ${difficulty} ${safeCategory} static self-contained challenge on the topic: ${topic}. Generate real encoded data — do not use placeholders.`
     );
 
     const design = JSON.parse(raw) as StaticChallengeDesign;
